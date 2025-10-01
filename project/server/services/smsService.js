@@ -15,7 +15,7 @@ const AT_BASE_URL = process.env.AFRICAS_TALKING_URL || 'https://api.sandbox.afri
  */
 export const sendSMS = async ({ to, message, from = 'SMS_PLATFORM' }) => {
   try {
-    console.log(`📱 Sending SMS to ${to} from ${from}`);
+    console.log(` Sending SMS to ${to} from ${from}`);
 
     const response = await axios.post(
       `${AT_BASE_URL}/version1/messaging`,

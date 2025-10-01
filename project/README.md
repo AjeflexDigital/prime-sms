@@ -2,6 +2,8 @@
 
 A comprehensive bulk SMS platform built with Node.js, Express.js, PostgreSQL, and React. This MVP provides everything needed to run a professional SMS service with user management, payment processing, reseller functionality, and admin controls.
 
+atsk_034c32d1d55d98e7b9ff481c862375b2f714392c7f234a94b6dc6b59cdad7ca0add6f377
+
 ## 🚀 Features
 
 ### 📊 Core Functionality
@@ -353,4 +355,81 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 
 
+
+
+Good question ⚡ — those two values (Google Client ID and Client Secret) come from creating an app in the Google Cloud Console. Here’s how you get them step by step:
+
+🔑 Steps to Get Google OAuth Credentials
+1. Go to Google Cloud Console
+
+Visit 👉 https://console.cloud.google.com/
+
+Log in with your Google account.
+
+2. Create a New Project (or Select Existing)
+
+At the top, click the project dropdown → New Project.
+
+Give it a name (e.g., BulkSMSApp).
+
+Click Create.
+
+3. Enable the OAuth Consent Screen
+
+In the left sidebar → APIs & Services → OAuth consent screen.
+
+Choose External (so normal users can log in).
+
+Fill in:
+
+App name (your app’s name)
+
+User support email
+
+Developer email
+
+Save.
+
+4. Create OAuth Credentials
+
+Go to APIs & Services → Credentials.
+
+Click Create Credentials → OAuth Client ID.
+
+Select Web Application.
+
+Enter name (e.g., BulkSMS Web Login).
+
+Under Authorized JavaScript Origins, add:
+
+http://localhost:5173 (for local dev)
+
+Your production domain (e.g., https://yoursite.com)
+
+Under Authorized Redirect URIs, add:
+
+http://localhost:5173/auth/callback (or your actual callback route)
+
+https://yoursite.com/auth/callback
+
+5. Copy Credentials
+
+After creating, Google will show:
+
+Client ID → paste into GOOGLE_CLIENT_ID
+
+Client Secret → paste into GOOGLE_CLIENT_SECRET
+
+📌 Example .env Setup
+GOOGLE_CLIENT_ID=1234567890-abc123def456.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-XYZ987654321
+
+
+⚠️ Important Notes
+
+If you’re only testing locally, you can just add http://localhost:5173 as redirect URI.
+
+Once you deploy, update Google Console with your real domain.
+
+Don’t expose the Client Secret in frontend — only backend should use it.
 osarumwenseosasere90@gmail.com

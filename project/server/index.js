@@ -34,19 +34,19 @@ app.use(cors({
 }));
 
 // Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
-app.use(limiter);
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 200, // limit each IP to 100 requests per windowMs
+//   message: 'Too many requests from this IP, please try again later.'
+// });
+// app.use(limiter);
 
-// Stricter rate limiting for authentication routes
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 80,
-  message: 'Too many authentication attempts, please try again later.'
-});
+// // Stricter rate limiting for authentication routes
+// const authLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 100,
+//   message: 'Too many authentication attempts, please try again later.'
+// });
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -56,7 +56,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static(join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/auth', authLimiter, authRoutes);
+// app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth',  authRoutes); // remember to remove this line when ready 
 app.use('/api/user', authMiddleware, userRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
 app.use('/api/sms', authMiddleware, smsRoutes);
