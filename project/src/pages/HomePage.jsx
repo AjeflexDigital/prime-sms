@@ -646,15 +646,32 @@ function HomePage() {
   return (
     <div className="min-h-screen">
       {/* SEO Meta Tags */}
-      <div className="hidden">
+      <head>
         <title>SMS Platform - Reliable Bulk SMS Service for Businesses</title>
         <meta name="description" content="Send bulk SMS messages to your customers with our reliable, affordable SMS platform. Start with 100 free credits. No setup fees, transparent pricing." />
-        <meta name="keywords" content="bulk sms, sms marketing, business messaging, sms api, nigeria sms" />
-        <meta property="og:title" content="SMS Platform - Reliable Bulk SMS Service" />
+        <meta name="keywords" content="bulk sms, sms marketing, business messaging, sms api, nigeria sms, paystack sms, africa talking sms" />
+        <meta name="author" content="SMS Platform" />
+        <meta name="robots" content="index, follow" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content="SMS Platform - Reliable Bulk SMS Service for Businesses" />
         <meta property="og:description" content="Send bulk SMS messages with our reliable platform. 100 free credits, transparent pricing, 99.9% uptime." />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://yourdomain.com" />
+        <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
+        <meta property="og:site_name" content="SMS Platform" />
+        
+        {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
-      </div>
+        <meta name="twitter:title" content="SMS Platform - Reliable Bulk SMS Service" />
+        <meta name="twitter:description" content="Send bulk SMS messages with our reliable platform. 100 free credits, transparent pricing." />
+        <meta name="twitter:image" content="https://yourdomain.com/twitter-image.jpg" />
+        
+        {/* Additional SEO */}
+        <link rel="canonical" href="https://yourdomain.com" />
+        <meta name="theme-color" content="#dc2626" />
+      </head>
 
       <Header />
       <HeroSection />

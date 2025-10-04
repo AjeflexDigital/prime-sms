@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /pricing
+Allow: /contact
+Allow: /register
+Allow: /login
+
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /reseller/
+Disallow: /api/
+
+Sitemap: https://yourdomain.com/sitemap.xml

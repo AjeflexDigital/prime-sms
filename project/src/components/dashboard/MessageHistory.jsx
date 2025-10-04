@@ -1,9 +1,374 @@
+// import React, { useState, useEffect } from 'react';
+// import { MessageSquare, Search, Filter, Download, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
+
+// function MessageHistory() {
+//   const [messages, setMessages] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [filters, setFilters] = useState({
+//     status: 'all',
+//     dateFrom: '',
+//     dateTo: '',
+//     search: ''
+//   });
+//   const [currentPage, setCurrentPage] = useState(1);
+//   const messagesPerPage = 20;
+
+//   // Mock data for demonstration
+//   useEffect(() => {
+//     setTimeout(() => {
+//       setMessages([
+//         {
+//           id: 1,
+//           recipient: '+234 801 234 5678',
+//           content: 'Your order has been confirmed and will be delivered within 24 hours.',
+//           senderId: 'MYSTORE',
+//           status: 'delivered',
+//           pages: 1,
+//           cost: 3.50,
+//           network: 'MTN',
+//           sentAt: '2024-01-15 10:30:00',
+//           deliveredAt: '2024-01-15 10:30:15'
+//         },
+//         {
+//           id: 2,
+//           recipient: '+234 802 345 6789',
+//           content: 'Welcome to our platform! Your account has been activated successfully.',
+//           senderId: 'SMS_PLATFORM',
+//           status: 'sent',
+//           pages: 1,
+//           cost: 3.50,
+//           network: 'AIRTEL',
+//           sentAt: '2024-01-15 09:15:00',
+//           deliveredAt: null
+//         },
+//         {
+//           id: 3,
+//           recipient: '+234 803 456 7890',
+//           content: 'Payment received successfully. Reference: TXN123456789. Thank you for your business.',
+//           senderId: 'PAYMENTS',
+//           status: 'failed',
+//           pages: 1,
+//           cost: 3.50,
+//           network: 'GLO',
+//           sentAt: '2024-01-15 08:45:00',
+//           deliveredAt: null,
+//           failedReason: 'Invalid number'
+//         },
+//         {
+//           id: 4,
+//           recipient: '+234 804 567 8901',
+//           content: 'Reminder: Your appointment is scheduled for tomorrow at 2:00 PM. Please arrive 15 minutes early.',
+//           senderId: 'CLINIC',
+//           status: 'delivered',
+//           pages: 2,
+//           cost: 7.00,
+//           network: 'ETISALAT',
+//           sentAt: '2024-01-14 16:20:00',
+//           deliveredAt: '2024-01-14 16:20:08'
+//         },
+//         {
+//           id: 5,
+//           recipient: '+234 805 678 9012',
+//           content: 'Your OTP is 123456. Valid for 10 minutes.',
+//           senderId: 'VERIFY',
+//           status: 'delivered',
+//           pages: 1,
+//           cost: 3.50,
+//           network: 'MTN',
+//           sentAt: '2024-01-14 14:10:00',
+//           deliveredAt: '2024-01-14 14:10:03'
+//         }
+//       ]);
+//       setLoading(false);
+//     }, 1000);
+//   }, []);
+
+//   const getStatusIcon = (status) => {
+//     switch (status) {
+//       case 'delivered':
+//         return <CheckCircle className="h-4 w-4 text-green-500" />;
+//       case 'sent':
+//         return <Clock className="h-4 w-4 text-blue-500" />;
+//       case 'failed':
+//         return <XCircle className="h-4 w-4 text-red-500" />;
+//       default:
+//         return <Clock className="h-4 w-4 text-gray-500" />;
+//     }
+//   };
+
+//   const getStatusBadge = (status) => {
+//     const baseClasses = "inline-flex px-2 py-1 text-xs font-medium rounded-full";
+//     switch (status) {
+//       case 'delivered':
+//         return `${baseClasses} bg-green-100 text-green-800`;
+//       case 'sent':
+//         return `${baseClasses} bg-blue-100 text-blue-800`;
+//       case 'failed':
+//         return `${baseClasses} bg-red-100 text-red-800`;
+//       default:
+//         return `${baseClasses} bg-gray-100 text-gray-800`;
+//     }
+//   };
+
+//   const filteredMessages = messages.filter(message => {
+//     if (filters.status !== 'all' && message.status !== filters.status) return false;
+//     if (filters.search && !message.recipient.includes(filters.search) && !message.content.toLowerCase().includes(filters.search.toLowerCase())) return false;
+//     return true;
+//   });
+
+//   const totalPages = Math.ceil(filteredMessages.length / messagesPerPage);
+//   const startIndex = (currentPage - 1) * messagesPerPage;
+//   const paginatedMessages = filteredMessages.slice(startIndex, startIndex + messagesPerPage);
+
+//   if (loading) {
+//     return (
+//       <div className="space-y-6">
+//         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+//           <div className="animate-pulse">
+//             <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+//             <div className="space-y-3">
+//               {[...Array(5)].map((_, i) => (
+//                 <div key={i} className="h-16 bg-gray-200 rounded"></div>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="space-y-6">
+//       {/* Header */}
+//       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+//         <div className="flex items-center justify-between">
+//           <div className="flex items-center">
+//             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mr-4">
+//               <MessageSquare className="h-6 w-6 text-blue-600" />
+//             </div>
+//             <div>
+//               <h2 className="text-2xl font-bold text-gray-900">Message History</h2>
+//               <p className="text-gray-600">View and manage your SMS message history</p>
+//             </div>
+//           </div>
+//           <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+//             <Download className="h-4 w-4 mr-2" />
+//             Export
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* Filters */}
+//       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+//         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+//             <div className="relative">
+//               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+//               <input
+//                 type="text"
+//                 placeholder="Search messages..."
+//                 value={filters.search}
+//                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+//                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+//               />
+//             </div>
+//           </div>
+          
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+//             <select
+//               value={filters.status}
+//               onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+//               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+//             >
+//               <option value="all">All Status</option>
+//               <option value="delivered">Delivered</option>
+//               <option value="sent">Sent</option>
+//               <option value="failed">Failed</option>
+//             </select>
+//           </div>
+          
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">From Date</label>
+//             <input
+//               type="date"
+//               value={filters.dateFrom}
+//               onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
+//               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+//             />
+//           </div>
+          
+//           <div>
+//             <label className="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+//             <input
+//               type="date"
+//               value={filters.dateTo}
+//               onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
+//               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+//             />
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Messages Table */}
+//       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+//         <div className="overflow-x-auto">
+//           <table className="min-w-full divide-y divide-gray-200">
+//             <thead className="bg-gray-50">
+//               <tr>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Recipient
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Message
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Status
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Network
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Cost
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Date
+//                 </th>
+//                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+//                   Actions
+//                 </th>
+//               </tr>
+//             </thead>
+//             <tbody className="bg-white divide-y divide-gray-200">
+//               {paginatedMessages.map((message) => (
+//                 <tr key={message.id} className="hover:bg-gray-50">
+//                   <td className="px-6 py-4 whitespace-nowrap">
+//                     <div>
+//                       <div className="text-sm font-medium text-gray-900">{message.recipient}</div>
+//                       <div className="text-sm text-gray-500">From: {message.senderId}</div>
+//                     </div>
+//                   </td>
+//                   <td className="px-6 py-4">
+//                     <div className="text-sm text-gray-900 max-w-xs truncate" title={message.content}>
+//                       {message.content}
+//                     </div>
+//                     <div className="text-sm text-gray-500">{message.pages} page(s)</div>
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap">
+//                     <div className="flex items-center">
+//                       {getStatusIcon(message.status)}
+//                       <span className={`ml-2 ${getStatusBadge(message.status)}`}>
+//                         {message.status}
+//                       </span>
+//                     </div>
+//                     {message.failedReason && (
+//                       <div className="text-xs text-red-600 mt-1">{message.failedReason}</div>
+//                     )}
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+//                     {message.network}
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+//                     ₦{message.cost.toFixed(2)}
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+//                     <div>{new Date(message.sentAt).toLocaleDateString()}</div>
+//                     <div>{new Date(message.sentAt).toLocaleTimeString()}</div>
+//                   </td>
+//                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+//                     <button className="text-red-600 hover:text-red-900 flex items-center">
+//                       <Eye className="h-4 w-4 mr-1" />
+//                       View
+//                     </button>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+
+//         {/* Pagination */}
+//         {totalPages > 1 && (
+//           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+//             <div className="flex-1 flex justify-between sm:hidden">
+//               <button
+//                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+//                 disabled={currentPage === 1}
+//                 className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+//               >
+//                 Previous
+//               </button>
+//               <button
+//                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+//                 disabled={currentPage === totalPages}
+//                 className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+//               >
+//                 Next
+//               </button>
+//             </div>
+//             <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+//               <div>
+//                 <p className="text-sm text-gray-700">
+//                   Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
+//                   <span className="font-medium">{Math.min(startIndex + messagesPerPage, filteredMessages.length)}</span> of{' '}
+//                   <span className="font-medium">{filteredMessages.length}</span> results
+//                 </p>
+//               </div>
+//               <div>
+//                 <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+//                   <button
+//                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+//                     disabled={currentPage === 1}
+//                     className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+//                   >
+//                     Previous
+//                   </button>
+//                   {[...Array(totalPages)].map((_, i) => (
+//                     <button
+//                       key={i + 1}
+//                       onClick={() => setCurrentPage(i + 1)}
+//                       className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+//                         currentPage === i + 1
+//                           ? 'z-10 bg-red-50 border-red-500 text-red-600'
+//                           : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+//                       }`}
+//                     >
+//                       {i + 1}
+//                     </button>
+//                   ))}
+//                   <button
+//                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+//                     disabled={currentPage === totalPages}
+//                     className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+//                   >
+//                     Next
+//                   </button>
+//                 </nav>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default MessageHistory;
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Search, Filter, Download, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { MessageSquare, Search, Filter, Download, Eye, Send, Users, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import axios from 'axios';
 
 function MessageHistory() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filters, setFilters] = useState({
     status: 'all',
     dateFrom: '',
@@ -11,77 +376,44 @@ function MessageHistory() {
     search: ''
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const messagesPerPage = 20;
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    pages: 0
+  });
 
-  // Mock data for demonstration
+  // Load messages from API
   useEffect(() => {
-    setTimeout(() => {
-      setMessages([
-        {
-          id: 1,
-          recipient: '+234 801 234 5678',
-          content: 'Your order has been confirmed and will be delivered within 24 hours.',
-          senderId: 'MYSTORE',
-          status: 'delivered',
-          pages: 1,
-          cost: 3.50,
-          network: 'MTN',
-          sentAt: '2024-01-15 10:30:00',
-          deliveredAt: '2024-01-15 10:30:15'
-        },
-        {
-          id: 2,
-          recipient: '+234 802 345 6789',
-          content: 'Welcome to our platform! Your account has been activated successfully.',
-          senderId: 'SMS_PLATFORM',
-          status: 'sent',
-          pages: 1,
-          cost: 3.50,
-          network: 'AIRTEL',
-          sentAt: '2024-01-15 09:15:00',
-          deliveredAt: null
-        },
-        {
-          id: 3,
-          recipient: '+234 803 456 7890',
-          content: 'Payment received successfully. Reference: TXN123456789. Thank you for your business.',
-          senderId: 'PAYMENTS',
-          status: 'failed',
-          pages: 1,
-          cost: 3.50,
-          network: 'GLO',
-          sentAt: '2024-01-15 08:45:00',
-          deliveredAt: null,
-          failedReason: 'Invalid number'
-        },
-        {
-          id: 4,
-          recipient: '+234 804 567 8901',
-          content: 'Reminder: Your appointment is scheduled for tomorrow at 2:00 PM. Please arrive 15 minutes early.',
-          senderId: 'CLINIC',
-          status: 'delivered',
-          pages: 2,
-          cost: 7.00,
-          network: 'ETISALAT',
-          sentAt: '2024-01-14 16:20:00',
-          deliveredAt: '2024-01-14 16:20:08'
-        },
-        {
-          id: 5,
-          recipient: '+234 805 678 9012',
-          content: 'Your OTP is 123456. Valid for 10 minutes.',
-          senderId: 'VERIFY',
-          status: 'delivered',
-          pages: 1,
-          cost: 3.50,
-          network: 'MTN',
-          sentAt: '2024-01-14 14:10:00',
-          deliveredAt: '2024-01-14 14:10:03'
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    const loadMessages = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: '20'
+        });
+
+        if (filters.status !== 'all') params.append('status', filters.status);
+        if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
+        if (filters.dateTo) params.append('dateTo', filters.dateTo);
+
+        const response = await axios.get(`/sms/messages?${params}`);
+        setMessages(response.data.messages || []);
+        setPagination(response.data.pagination || {});
+
+      } catch (error) {
+        console.error('Failed to load messages:', error);
+        setError('Failed to load message history');
+        setMessages([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMessages();
+  }, [currentPage, filters]);
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -110,15 +442,29 @@ function MessageHistory() {
     }
   };
 
-  const filteredMessages = messages.filter(message => {
-    if (filters.status !== 'all' && message.status !== filters.status) return false;
-    if (filters.search && !message.recipient.includes(filters.search) && !message.content.toLowerCase().includes(filters.search.toLowerCase())) return false;
-    return true;
-  });
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentPage(1); // Reset to first page when filtering
+  };
 
-  const totalPages = Math.ceil(filteredMessages.length / messagesPerPage);
-  const startIndex = (currentPage - 1) * messagesPerPage;
-  const paginatedMessages = filteredMessages.slice(startIndex, startIndex + messagesPerPage);
+  const exportMessages = async () => {
+    try {
+      const response = await axios.get('/sms/messages/export', {
+        params: filters,
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `messages_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -151,205 +497,239 @@ function MessageHistory() {
               <p className="text-gray-600">View and manage your SMS message history</p>
             </div>
           </div>
-          <button className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </button>
+          {messages.length > 0 && (
+            <button 
+              onClick={exportMessages}
+              className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </button>
+          )}
         </div>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
+          <AlertCircle className="h-5 w-5 text-red-600 mr-3 flex-shrink-0" />
+          <span className="text-red-700 text-sm">{error}</span>
+        </div>
+      )}
+
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      {messages.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search messages..."
+                  value={filters.search}
+                  onChange={(e) => handleFilterChange('search', e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <select
+                value={filters.status}
+                onChange={(e) => handleFilterChange('status', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              >
+                <option value="all">All Status</option>
+                <option value="delivered">Delivered</option>
+                <option value="sent">Sent</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">From Date</label>
               <input
-                type="text"
-                placeholder="Search messages..."
-                value={filters.search}
-                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                type="date"
+                value={filters.dateFrom}
+                onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">To Date</label>
+              <input
+                type="date"
+                value={filters.dateTo}
+                onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               />
             </div>
           </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <select
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+        </div>
+      )}
+
+      {/* Messages Table or Empty State */}
+      {messages.length === 0 ? (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+          <MessageSquare className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No Message History Yet</h3>
+          <p className="text-gray-600 mb-6">
+            You haven't sent any SMS messages yet. Start by sending your first message!
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a
+              href="/dashboard/send"
+              className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              <option value="all">All Status</option>
-              <option value="delivered">Delivered</option>
-              <option value="sent">Sent</option>
-              <option value="failed">Failed</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">From Date</label>
-            <input
-              type="date"
-              value={filters.dateFrom}
-              onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">To Date</label>
-            <input
-              type="date"
-              value={filters.dateTo}
-              onChange={(e) => setFilters(prev => ({ ...prev, dateTo: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-            />
+              <Send className="h-4 w-4 mr-2" />
+              Send Single SMS
+            </a>
+            <a
+              href="/dashboard/bulk"
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Send Bulk SMS
+            </a>
           </div>
         </div>
-      </div>
-
-      {/* Messages Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Recipient
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Message
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Network
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Cost
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {paginatedMessages.map((message) => (
-                <tr key={message.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{message.recipient}</div>
-                      <div className="text-sm text-gray-500">From: {message.senderId}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs truncate" title={message.content}>
-                      {message.content}
-                    </div>
-                    <div className="text-sm text-gray-500">{message.pages} page(s)</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {getStatusIcon(message.status)}
-                      <span className={`ml-2 ${getStatusBadge(message.status)}`}>
-                        {message.status}
-                      </span>
-                    </div>
-                    {message.failedReason && (
-                      <div className="text-xs text-red-600 mt-1">{message.failedReason}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {message.network}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₦{message.cost.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div>{new Date(message.sentAt).toLocaleDateString()}</div>
-                    <div>{new Date(message.sentAt).toLocaleTimeString()}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-red-600 hover:text-red-900 flex items-center">
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </button>
-                  </td>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Recipient
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Message
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Network
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Cost
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div className="flex-1 flex justify-between sm:hidden">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-700">
-                  Showing <span className="font-medium">{startIndex + 1}</span> to{' '}
-                  <span className="font-medium">{Math.min(startIndex + messagesPerPage, filteredMessages.length)}</span> of{' '}
-                  <span className="font-medium">{filteredMessages.length}</span> results
-                </p>
-              </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  {[...Array(totalPages)].map((_, i) => (
-                    <button
-                      key={i + 1}
-                      onClick={() => setCurrentPage(i + 1)}
-                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                        currentPage === i + 1
-                          ? 'z-10 bg-red-50 border-red-500 text-red-600'
-                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                      }`}
-                    >
-                      {i + 1}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </nav>
-              </div>
-            </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {messages.map((message) => (
+                  <tr key={message.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{message.recipient}</div>
+                        <div className="text-sm text-gray-500">From: {message.sender_id}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 max-w-xs truncate" title={message.content}>
+                        {message.content}
+                      </div>
+                      <div className="text-sm text-gray-500">{message.pages} page(s)</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        {getStatusIcon(message.status)}
+                        <span className={`ml-2 ${getStatusBadge(message.status)}`}>
+                          {message.status}
+                        </span>
+                      </div>
+                      {message.failed_reason && (
+                        <div className="text-xs text-red-600 mt-1">{message.failed_reason}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {message.network || 'Unknown'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ₦{parseFloat(message.cost || 0).toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div>{new Date(message.created_at).toLocaleDateString()}</div>
+                      <div>{new Date(message.created_at).toLocaleTimeString()}</div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {/* Pagination */}
+          {pagination.pages > 1 && (
+            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.pages))}
+                  disabled={currentPage === pagination.pages}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">
+                    Showing <span className="font-medium">{((currentPage - 1) * pagination.limit) + 1}</span> to{' '}
+                    <span className="font-medium">{Math.min(currentPage * pagination.limit, pagination.total)}</span> of{' '}
+                    <span className="font-medium">{pagination.total}</span> results
+                  </p>
+                </div>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    {[...Array(Math.min(pagination.pages, 5))].map((_, i) => {
+                      const pageNum = i + 1;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                            currentPage === pageNum
+                              ? 'z-10 bg-red-50 border-red-500 text-red-600'
+                              : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.pages))}
+                      disabled={currentPage === pagination.pages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
