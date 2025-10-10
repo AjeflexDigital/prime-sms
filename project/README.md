@@ -359,8 +359,11 @@ the payment integration
 
 
 
-psql -U sms_platform 
+psql -U postgres -d sms_platform
 
+\i 'C:/sms-node/project/ysupabase/migrations/002.sql';
+
+\i '../supabase/migrations/002.sql';
 
 
 
