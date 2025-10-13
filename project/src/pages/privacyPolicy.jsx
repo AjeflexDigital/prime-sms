@@ -88,7 +88,7 @@ function PrivacyTermsPage() {
           <p className="text-sm text-gray-600">
             Questions? Contact us at{' '}
             <a href="mailto:legal@Prime Sms.com" className="text-red-600 hover:text-red-700 font-medium">
-              legal@Prime Sms.com
+              legal@PrimeSms.com
             </a>
           </p>
         </div>
@@ -424,8 +424,8 @@ function TermsOfService({ expandedSections, toggleSection }) {
         <h4 className="font-semibold text-blue-900 mb-2">Contact Us</h4>
         <p className="text-blue-800 text-sm">
           If you have any questions about these Terms of Service, please contact us at{' '}
-          <a href="mailto:legal@Prime Sms.com" className="font-medium underline">
-            legal@Prime Sms.com
+          <a href="mailto:legal@PrimeSms.com" className="font-medium underline">
+            legal@PrimeSms.com
           </a>
         </p>
       </div>

@@ -14,6 +14,9 @@ import ResetPassword from './pages/ResetPassword';
 import ForgotPassword from './pages/ForgotPassword';
 import PricingPage from './pages/PricingPage';
 import ContactPage from './pages/ContactPage';
+// import NotFoundPage from './pages/NotFoundPage';
+
+import PrivacyTermsPage from './pages/privacyPolicy'
 
 // Components
 import LoadingSpinner from './components/LoadingSpinner';
@@ -73,6 +76,7 @@ function AppContent() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/verify-email/:token" element={<VerifyEmail />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/privacy" element={<PrivacyTermsPage />} />
             
             {/* Auth Routes (redirect if authenticated) */}
             <Route 

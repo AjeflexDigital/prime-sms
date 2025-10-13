@@ -236,11 +236,11 @@ function RegisterPage() {
               />
               <label htmlFor="terms" className="ml-2 text-sm text-gray-700">
                 I agree to the{' '}
-                <a href="#" className="text-red-600 hover:text-red-500 font-medium">
+                <a href="/privacy" className="text-red-600 hover:text-red-500 font-medium">
                   Terms of Service
                 </a>{' '}
                 and{' '}
-                <a href="#" className="text-red-600 hover:text-red-500 font-medium">
+                <a href="/privacy" className="text-red-600 hover:text-red-500 font-medium">
                   Privacy Policy
                 </a>
               </label>
