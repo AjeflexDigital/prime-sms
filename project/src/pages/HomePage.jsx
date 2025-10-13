@@ -486,7 +486,7 @@ const ContactSection = () => {
                 <MessageSquare className="h-6 w-6 text-red-600 mr-4 mt-1" />
                 <div>
                   <h3 className="font-semibold text-gray-900">Email Support</h3>
-                  <p className="text-gray-600">support@smsplatform.com</p>
+                  <p className="text-gray-600">support@Prime Sms.com</p>
                   <p className="text-sm text-gray-500">Response within 2 hours</p>
                 </div>
               </div>
@@ -634,7 +634,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 SMS Platform. All rights reserved. Built with ❤️ for businesses worldwide.</p>
+          <p>&copy; 2025 Prime Sms. All rights reserved. Built with ❤️ for businesses worldwide.</p>
         </div>
       </div>
     </footer>

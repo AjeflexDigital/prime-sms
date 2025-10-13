@@ -185,7 +185,7 @@ function AdminDashboard() {
                   {navigation.find(item => item.current)?.name || 'Admin Dashboard'}
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Manage your SMS platform
+                  Manage Prime Sms
                 </p>
               </div>
               

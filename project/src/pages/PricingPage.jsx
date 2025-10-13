@@ -102,7 +102,7 @@ function PricingPage() {
           <div className="flex justify-between items-center h-16">
             <Link to="/" className="flex items-center">
               <MessageSquare className="h-8 w-8 text-red-600 mr-2" />
-              <span className="text-xl font-bold text-gray-900">SMS Platform</span>
+              <span className="text-xl font-bold text-gray-900">Prime Sms</span>
             </Link>
             <div className="flex items-center space-x-4">
               <Link to="/login" className="text-gray-600 hover:text-red-600 font-medium">
@@ -374,7 +374,7 @@ function PricingPage() {
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center mb-4">
                 <MessageSquare className="h-8 w-8 text-red-500 mr-2" />
-                <span className="text-xl font-bold">SMS Platform</span>
+                <span className="text-xl font-bold">Prime Sms</span>
               </div>
               <p className="text-gray-400 mb-4">
                 The most reliable SMS platform for businesses of all sizes.
@@ -410,7 +410,7 @@ function PricingPage() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 SMS Platform. All rights reserved.</p>
+            <p>&copy; 2025 Prime Sms. All rights reserved.</p>
           </div>
         </div>
       </footer>

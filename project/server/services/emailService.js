@@ -34,7 +34,7 @@ export const sendEmail = async ({ to, subject, html, text }) => {
 
     const mailOptions = {
       from: {
-        name: process.env.SMTP_FROM_NAME || 'SMS Platform',
+        name: process.env.SMTP_FROM_NAME || 'Prime Sms',
         address: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER
       },
       to,
@@ -64,7 +64,7 @@ export const sendEmail = async ({ to, subject, html, text }) => {
  * @param {Object} userData - User information
  */
 export const sendWelcomeEmail = async ({ email, fullName, verificationToken }) => {
-  const subject = 'Welcome to SMS Platform - Verify Your Account';
+  const subject = 'Welcome to Prime Sms - Verify Your Account';
   const html = `
     <!DOCTYPE html>
     <html>
@@ -82,11 +82,11 @@ export const sendWelcomeEmail = async ({ email, fullName, verificationToken }) =
     <body>
       <div class="container">
         <div class="header">
-          <h1>🚀 Welcome to SMS Platform!</h1>
+          <h1>🚀 Welcome to Prime Sms!</h1>
         </div>
         <div class="content">
           <h2>Hi ${fullName || 'there'}!</h2>
-          <p>Thank you for joining our SMS platform. You're now ready to send professional SMS messages to your customers with ease.</p>
+          <p>Thank you for joining our Prime Sms. You're now ready to send professional SMS messages to your customers with ease.</p>
           
           <p><strong>🎉 You've received 100 FREE trial credits to get started!</strong></p>
           
@@ -112,7 +112,7 @@ export const sendWelcomeEmail = async ({ email, fullName, verificationToken }) =
             <li>📚 Check our knowledge base for guides</li>
           </ul>
           
-          <p>Best regards,<br>The SMS Platform Team</p>
+          <p>Best regards,<br>The Prime Sms Team</p>
         </div>
       </div>
     </body>
@@ -127,7 +127,7 @@ export const sendWelcomeEmail = async ({ email, fullName, verificationToken }) =
  * @param {Object} paymentData - Payment information
  */
 export const sendPaymentReceiptEmail = async ({ email, fullName, amount, credits, bonusCredits, reference }) => {
-  const subject = `Payment Receipt - ₦${amount} | SMS Platform`;
+  const subject = `Payment Receipt - ₦${amount} | Prime Sms`;
   const html = `
     <!DOCTYPE html>
     <html>
@@ -165,9 +165,9 @@ export const sendPaymentReceiptEmail = async ({ email, fullName, amount, credits
           
           <p>You can now use these credits to send SMS messages to your customers. Log in to your dashboard to get started!</p>
           
-          <p>Thank you for choosing SMS Platform for your messaging needs.</p>
+          <p>Thank you for choosing Prime Sms for your messaging needs.</p>
           
-          <p>Best regards,<br>The SMS Platform Team</p>
+          <p>Best regards,<br>The Prime Sms Team</p>
         </div>
       </div>
     </body>
@@ -182,7 +182,7 @@ export const sendPaymentReceiptEmail = async ({ email, fullName, amount, credits
  * @param {Object} userData - User information
  */
 export const sendLowBalanceAlert = async ({ email, fullName, currentBalance }) => {
-  const subject = '⚠️ Low Balance Alert - SMS Platform';
+  const subject = '⚠️ Low Balance Alert - Prime Sms';
   const html = `
     <!DOCTYPE html>
     <html>
@@ -203,7 +203,7 @@ export const sendLowBalanceAlert = async ({ email, fullName, currentBalance }) =
         </div>
         <div class="content">
           <h2>Hi ${fullName || 'there'}!</h2>
-          <p>Your SMS Platform account balance is running low. You may want to top up to ensure uninterrupted service.</p>
+          <p>Your Prime Sms account balance is running low. You may want to top up to ensure uninterrupted service.</p>
           
           <div class="balance">
             Current Balance: ₦${currentBalance}
@@ -223,7 +223,7 @@ export const sendLowBalanceAlert = async ({ email, fullName, currentBalance }) =
           
           <p>Need assistance? Contact our support team anytime.</p>
           
-          <p>Best regards,<br>The SMS Platform Team</p>
+          <p>Best regards,<br>The Prime Sms Team</p>
         </div>
       </div>
     </body>

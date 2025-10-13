@@ -300,7 +300,7 @@ function LoginPage() {
             <MessageSquare className="h-12 w-12 text-red-600" />
           </Link>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-          <p className="text-gray-600">Sign in to your SMS Platform account</p>
+          <p className="text-gray-600">Sign in to your Prime Sms account</p>
         </div>
 
         {/* Login Form */}
@@ -440,7 +440,7 @@ function LoginPage() {
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">New to SMS Platform?</span>
+                <span className="px-2 bg-white text-gray-500">New to Prime Sms?</span>
               </div>
             </div>
           </div>
