@@ -28,7 +28,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center">
             <MessageSquare className="h-8 w-8 text-red-600 mr-2" />
-            <span className="text-xl font-bold text-gray-900">SMS Platform</span>
+            <span className="text-xl font-bold text-gray-900">Prime Sms</span>
           </div>
 
           {/* Desktop Navigation */}
@@ -647,10 +647,10 @@ function HomePage() {
     <div className="min-h-screen">
       {/* SEO Meta Tags */}
       <head>
-        <title>SMS Platform - Reliable Bulk SMS Service for Businesses</title>
+        <title>Prime Sms - Reliable Bulk SMS Service for Businesses</title>
         <meta name="description" content="Send bulk SMS messages to your customers with our reliable, affordable SMS platform. Start with 100 free credits. No setup fees, transparent pricing." />
         <meta name="keywords" content="bulk sms, sms marketing, business messaging, sms api, nigeria sms, paystack sms, africa talking sms" />
-        <meta name="author" content="SMS Platform" />
+        <meta name="author" content="Prime Sms" />
         <meta name="robots" content="index, follow" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         
@@ -658,18 +658,18 @@ function HomePage() {
         <meta property="og:title" content="SMS Platform - Reliable Bulk SMS Service for Businesses" />
         <meta property="og:description" content="Send bulk SMS messages with our reliable platform. 100 free credits, transparent pricing, 99.9% uptime." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yourdomain.com" />
-        <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
-        <meta property="og:site_name" content="SMS Platform" />
+        <meta property="og:url" content="https://www.primesms.com.ng" />
+        <meta property="og:image" content="https://www.primesms.com.ng/og-image.jpg" />
+        <meta property="og:site_name" content="Prime Sms" />
         
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="SMS Platform - Reliable Bulk SMS Service" />
         <meta name="twitter:description" content="Send bulk SMS messages with our reliable platform. 100 free credits, transparent pricing." />
-        <meta name="twitter:image" content="https://yourdomain.com/twitter-image.jpg" />
+        <meta name="twitter:image" content="https://www.primesms.com.ng/twitter-image.jpg" />
         
         {/* Additional SEO */}
-        <link rel="canonical" href="https://yourdomain.com" />
+        <link rel="canonical" href="https://www.primesms.com.ng" />
         <meta name="theme-color" content="#dc2626" />
       </head>
 

@@ -390,7 +390,7 @@ const generateTokens = (userId) => {
   const refreshToken = jwt.sign(
     { userId },
     process.env.JWT_REFRESH_SECRET || 'your-refresh-secret',
-    { expiresIn: '7d' }
+    { expiresIn: '30d' }
   );
   
   return { accessToken, refreshToken };
@@ -598,21 +598,21 @@ router.post('/verify-email', async (req, res) => {
  * POST /api/auth/refresh-token
  * Refresh access token
  */
+
 router.post('/refresh-token', async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    
+
     if (!refreshToken) {
       return res.status(401).json({ message: 'Refresh token required' });
     }
 
-    // Verify refresh token
     const decoded = jwt.verify(
       refreshToken,
-      process.env.JWT_REFRESH_SECRET || 'your-refresh-secret'
+      process.env.JWT_REFRESH_SECRET
     );
 
-    // Check if user still exists and is active
+    // Check if user still exists
     const userResult = await query(
       'SELECT id FROM users WHERE id = $1 AND status = $2',
       [decoded.userId, 'active']
@@ -622,16 +622,50 @@ router.post('/refresh-token', async (req, res) => {
       return res.status(401).json({ message: 'User not found or inactive' });
     }
 
-    // Generate new tokens
-    const tokens = generateTokens(decoded.userId);
+    // ✅ Generate new tokens
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(decoded.userId);
 
-    res.json(tokens);
+    return res.json({ accessToken, refreshToken: newRefreshToken });
 
   } catch (error) {
     console.error('Token refresh error:', error);
-    res.status(401).json({ message: 'Invalid refresh token' });
+    return res.status(401).json({ message: 'Invalid or expired refresh token' });
   }
 });
+// router.post('/refresh-token', async (req, res) => {
+//   try {
+//     const { refreshToken } = req.body;
+    
+//     if (!refreshToken) {
+//       return res.status(401).json({ message: 'Refresh token required' });
+//     }
+
+//     // Verify refresh token
+//     const decoded = jwt.verify(
+//       refreshToken,
+//       process.env.JWT_REFRESH_SECRET || 'your-refresh-secret'
+//     );
+
+//     // Check if user still exists and is active
+//     const userResult = await query(
+//       'SELECT id FROM users WHERE id = $1 AND status = $2',
+//       [decoded.userId, 'active']
+//     );
+
+//     if (userResult.rows.length === 0) {
+//       return res.status(401).json({ message: 'User not found or inactive' });
+//     }
+
+//     // Generate new tokens
+//     const tokens = generateTokens(decoded.userId);
+
+//     res.json(tokens);
+
+//   } catch (error) {
+//     console.error('Token refresh error:', error);
+//     res.status(401).json({ message: 'Invalid refresh token' });
+//   }
+// });
 
 /**
  * POST /api/auth/forgot-password

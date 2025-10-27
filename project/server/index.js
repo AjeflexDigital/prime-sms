@@ -159,8 +159,8 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📱 SMS Platform API is ready`);
+  console.log(` Server running on port ${PORT}`);
+  console.log(` SMS Platform API is ready`);
 });
 
 export default app;

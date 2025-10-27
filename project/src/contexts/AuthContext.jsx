@@ -229,33 +229,45 @@ axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+
+    // If token expired and we haven’t retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        try {
-          const response = await axios.post('/auth/refresh-token', { refreshToken });
-          const { accessToken } = response.data;
-          
-          localStorage.setItem('accessToken', accessToken);
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          
-          return axios(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed, redirect to login
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
-        }
+      if (!refreshToken) {
+        // 🚪 No refresh token — force logout
+        localStorage.clear();
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      try {
+        const response = await axios.post('/auth/refresh-token', { refreshToken });
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+        // ✅ Save new tokens
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
+
+        // Retry original request with new token
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return axios(originalRequest);
+
+      } catch (refreshError) {
+        // ❌ Refresh failed — clear tokens and logout
+        console.error('Refresh token expired or invalid:', refreshError);
+        localStorage.clear();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
       }
     }
-    
+
+    // For other errors — just reject
     return Promise.reject(error);
   }
 );
+
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

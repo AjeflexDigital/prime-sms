@@ -91,7 +91,7 @@ export const sendWelcomeEmail = async ({ email, fullName, verificationToken }) =
           <p><strong>🎉 You've received 100 FREE trial credits to get started!</strong></p>
           
           <p>To complete your registration, please verify your email address:</p>
-          <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email/${verificationToken}" class="button">
+          <a href="${process.env.CLIENT_URL}/verify-email/${verificationToken}" class="button">
             Verify Email Address
           </a>
           
@@ -210,7 +210,7 @@ export const sendLowBalanceAlert = async ({ email, fullName, currentBalance }) =
           </div>
           
           <p>To continue sending SMS messages, please add credits to your account:</p>
-          <a href="${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard/wallet" class="button">
+          <a href="${process.env.CLIENT_URL}/dashboard/wallet" class="button">
             Top Up Now
           </a>
           

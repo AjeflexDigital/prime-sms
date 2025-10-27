@@ -447,3 +447,4 @@ Once you deploy, update Google Console with your real domain.
 
 Don’t expose the Client Secret in frontend — only backend should use it.
 osarumwenseosasere90@gmail.com
+joshuasel06@gmail.com pass dy1234

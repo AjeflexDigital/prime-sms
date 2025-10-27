@@ -21,6 +21,40 @@ const paystackAPI = axios.create({
  * Initialize Paystack payment
  * @param {Object} paymentData - Payment initialization data
  */
+
+// export const initializePaystackPayment = async (paymentData) => {
+//   try {
+//     const { email, amount, reference, userId, callbackUrl } = paymentData;
+
+//     const response = await paystackAPI.post('/transaction/initialize', {
+//       email,
+//       amount: amount * 100, // Convert to kobo
+//       reference,
+//       currency: 'NGN',
+//       callback_url: callbackUrl,
+//       metadata: {
+//         user_id: userId,
+//         custom_fields: [
+//           {
+//             display_name: "User ID",
+//             variable_name: "user_id",
+//             value: userId
+//           }
+//         ]
+//       }
+//     });
+
+//     return {
+//       success: true,
+//       data: response.data.data
+//     };
+
+//   } catch (error) {
+//     console.error('Paystack initialization error:', error);
+//     throw new Error(error.response?.data?.message || 'Payment initialization failed');
+//   }
+// };
+
 export const initializePaystackPayment = async (paymentData) => {
   try {
     const { email, amount, reference, userId, callbackUrl } = paymentData;
@@ -31,6 +65,8 @@ export const initializePaystackPayment = async (paymentData) => {
       reference,
       currency: 'NGN',
       callback_url: callbackUrl,
+      subaccount: process.env.PAYSTACK_SUBACCOUNT_CODE, //  Paystack subaccount code
+      bearer: 'subaccount', //  ensures PrimeSMS (subaccount) pays transaction fees
       metadata: {
         user_id: userId,
         custom_fields: [
@@ -53,6 +89,8 @@ export const initializePaystackPayment = async (paymentData) => {
     throw new Error(error.response?.data?.message || 'Payment initialization failed');
   }
 };
+
+
 
 /**
  * Verify Paystack payment
