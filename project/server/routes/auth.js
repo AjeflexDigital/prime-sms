@@ -383,13 +383,13 @@ const router = express.Router();
 const generateTokens = (userId) => {
   const accessToken = jwt.sign(
     { userId },
-    process.env.JWT_SECRET || 'your-secret-key',
+    process.env.JWT_SECRET || '-secret-key',
     { expiresIn: '15m' }
   );
   
   const refreshToken = jwt.sign(
     { userId },
-    process.env.JWT_REFRESH_SECRET || 'your-refresh-secret',
+    process.env.JWT_REFRESH_SECRET || '-refresh-secret',
     { expiresIn: '30d' }
   );
   
