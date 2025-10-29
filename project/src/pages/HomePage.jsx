@@ -924,7 +924,7 @@ const HeroSection = () => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
               <button className="group px-8 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:shadow-2xl hover:shadow-red-500/50 transition-all transform hover:scale-105 flex items-center justify-center">
-                Start Sending Free
+                Start Sending 
                 <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
               <button className="group px-8 py-4 bg-white text-gray-700 rounded-xl font-semibold border-2 border-gray-200 hover:border-red-600 hover:text-red-600 transition-all flex items-center justify-center">
@@ -1266,10 +1266,10 @@ const PricingSection = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             No hidden fees, no setup costs, no surprises. Pay only for what you use with automatic volume discounts and bonus credits on every purchase.
           </p>
-          <div className="inline-flex items-center bg-green-50 text-green-700 rounded-lg px-6 py-3 border border-green-200">
+          {/* <div className="inline-flex items-center bg-green-50 text-green-700 rounded-lg px-6 py-3 border border-green-200">
             <Check className="h-5 w-5 mr-2" />
             <span className="font-semibold">100 Free SMS Credits on Signup - No Credit Card Required</span>
-          </div>
+          </div> */}
         </div>
         
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -1403,7 +1403,7 @@ const TestimonialsSection = () => {
       company: "StartupHub",
       avatar: "EO",
       rating: 5,
-      text: "As a startup, the free credits and pay-as-you-go model were perfect for us. The platform is intuitive, and we've scaled from 1,000 to 100,000 messages per month without any issues.",
+      text: "As a startup the platform is intuitive, and we've scaled from 1,000 to 100,000 messages per month without any issues.",
       metric: "100x Growth"
     },
     {
@@ -1903,7 +1903,7 @@ function HomePage() {
       {/* SEO Meta Tags */}
       <head>
         <title>Prime Sms - Reliable Bulk SMS Service for Businesses</title>
-        <meta name="description" content="Send bulk SMS messages to your customers with our reliable, affordable SMS platform. Start with 100 free credits. No setup fees, transparent pricing." />
+        <meta name="description" content="Send bulk SMS messages to your customers with our reliable, affordable SMS platform. No setup fees, transparent pricing." />
         <meta name="keywords" content="bulk sms, sms marketing, business messaging, sms api, nigeria sms, paystack sms, africa talking sms" />
         <meta name="author" content="Prime Sms" />
         <meta name="robots" content="index, follow" />
@@ -1911,7 +1911,7 @@ function HomePage() {
         
         {/* Open Graph Meta Tags */}
         <meta property="og:title" content="SMS Platform - Reliable Bulk SMS Service for Businesses" />
-        <meta property="og:description" content="Send bulk SMS messages with our reliable platform. 100 free credits, transparent pricing, 99.9% uptime." />
+        <meta property="og:description" content="Send bulk SMS messages with our reliable platform. Transparent pricing, 99.9% uptime." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://www.primesms.com.ng" />
         <meta property="og:image" content="https://www.primesms.com.ng/og-image.jpg" />
@@ -1920,7 +1920,7 @@ function HomePage() {
         {/* Twitter Card Meta Tags */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="SMS Platform - Reliable Bulk SMS Service" />
-        <meta name="twitter:description" content="Send bulk SMS messages with our reliable platform. 100 free credits, transparent pricing." />
+        <meta name="twitter:description" content="Send bulk SMS messages with our reliable platform. Transparent pricing." />
         <meta name="twitter:image" content="https://www.primesms.com.ng/twitter-image.jpg" />
         
         {/* Additional SEO */}
