@@ -961,7 +961,7 @@ const HeroSection = () => {
                 <div>
                   <div className="text-sm text-gray-600">Messages Sent</div>
                   <div className="text-2xl font-bold text-gray-900">
-                    <AnimatedCounter end={2400} suffix="K+" />
+                    <AnimatedCounter end={1} suffix="K+" />
                   </div>
                 </div>
               </div>

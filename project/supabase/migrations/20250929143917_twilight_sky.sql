@@ -1,5 +1,5 @@
 /*
-  # SMS Platform Database Schema
+  # Prime Sms Database Schema
 
   1. Core Tables
     - `users` - User accounts with role-based access
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS messages (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
     recipient VARCHAR(20) NOT NULL,
     content TEXT NOT NULL,
-    sender_id VARCHAR(20) DEFAULT 'SMS_PLATFORM',
+    sender_id VARCHAR(20) DEFAULT 'Prime Sms',
     message_id VARCHAR(255),
     status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'delivered', 'failed', 'queued')),
     pages INTEGER DEFAULT 1,
@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS scheduled_messages (
     template_id UUID REFERENCES templates(id),
     recipients TEXT[] NOT NULL,
     content TEXT NOT NULL,
-    sender_id VARCHAR(20) DEFAULT 'SMS_PLATFORM',
+    sender_id VARCHAR(20) DEFAULT 'Prime Sms',
     scheduled_at TIMESTAMP NOT NULL,
     status VARCHAR(50) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'processing', 'completed', 'failed', 'cancelled')),
     total_recipients INTEGER DEFAULT 0,
@@ -240,17 +240,16 @@ INSERT INTO spam_words (word, severity, action) VALUES
 
 -- Insert default system settings
 INSERT INTO system_settings (setting_key, setting_value, setting_type, description, is_public) VALUES
-('platform_name', 'SMS Platform', 'string', 'Platform display name', TRUE),
-('support_email', 'support@smsplatform.com', 'string', 'Support contact email', TRUE),
-('trial_credits', '100', 'number', 'Default trial credits for new users', FALSE),
+('platform_name', 'Prime Sms', 'string', 'Platform display name', TRUE),
+('support_email', 'support@primesms.com.ng', 'string', 'Support contact email', TRUE),
 ('max_message_length', '1000', 'number', 'Maximum characters per message', TRUE),
 ('sender_id_approval', 'true', 'boolean', 'Require admin approval for sender IDs', FALSE);
 
 -- Create default admin user (password: admin123)
 INSERT INTO users (email, password, role, status, credits, email_verified) VALUES
-('admin@smsplatform.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewCsI.6YgdQNcvGi', 'admin', 'active', 10000.00, TRUE);
+('adminajeflex@primesms.com', '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewCsI.6YgdQNcvGi', 'admin', 'active', 10000.00, TRUE);
 
 -- Create profile for admin user
 INSERT INTO profiles (user_id, full_name, phone, company) 
-SELECT id, 'System Administrator', '+2348000000000', 'SMS Platform'
-FROM users WHERE email = 'admin@smsplatform.com';
+SELECT id, 'System Administrator', '+2348000000000', 'Prime Sms'
+FROM users WHERE email = 'adminajeflex@primesms.com';
