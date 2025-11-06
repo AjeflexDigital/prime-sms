@@ -490,7 +490,7 @@ router.post('/register', [
 
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Server error during registration' });
+    res.status(500).json({ message: 'Server error during registration', details: error.message  });
   }
 });
 
