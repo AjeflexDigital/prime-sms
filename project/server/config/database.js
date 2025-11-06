@@ -165,12 +165,38 @@ if (connectionString) {
 
 const pool = new Pool(poolConfig);
 
+// Verbose/diagnostic logging (enabled when DEBUG=1 or LOG_LEVEL=debug)
+const verbose = process.env.DEBUG === "1" || process.env.LOG_LEVEL === "debug";
+
+// Helper to mask sensitive parts of a connection string for logs
+const maskConnectionString = (s) => {
+  if (!s) return null;
+  // replace password (between : and @) with *****
+  return s.replace(/:(.+?)@/, ":*****@");
+};
+
+if (verbose) {
+  console.log("--- DB connection diagnostic ---");
+  console.log("NODE_ENV=", process.env.NODE_ENV);
+  console.log("Has DATABASE_URL=", !!connectionString);
+  if (connectionString)
+    console.log("DATABASE_URL=", maskConnectionString(connectionString));
+  // show non-sensitive poolConfig entries and redact password if present
+  const cfg = { ...poolConfig };
+  if (cfg.password) cfg.password = "*****";
+  if (cfg.connectionString) delete cfg.connectionString; // already shown masked
+  console.log("poolConfig (redacted)=", cfg);
+  console.log("--------------------------------");
+}
+
 pool.on("connect", () => {
   console.log("✅ Connected to PostgreSQL database");
 });
 
 pool.on("error", (err) => {
-  console.error("❌ Database connection error:", err);
+  // Always log the main error message. When verbose, include stack and full error object.
+  console.error("❌ Database connection error:", err.message || err);
+  if (verbose) console.error(err.stack || err);
   // In many hosting environments the app should crash so the platform can restart it
   process.exit(-1);
 });
@@ -180,7 +206,8 @@ export const query = async (text, params) => {
     const res = await pool.query(text, params);
     return res;
   } catch (error) {
-    console.error("❌ Database query error:", error);
+    console.error("❌ Database query error:", error.message || error);
+    if (verbose) console.error(error.stack || error);
     throw error;
   }
 };
