@@ -113,11 +113,18 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Security middleware
+// app.use(helmet());
+// app.use(cors({
+//   origin: process.env.CLIENT_URL || 'https://www.primesms.com.ng',
+//   credentials: true
+// }));
+
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://www.primesms.com.ng',
+  origin: true,
   credentials: true
 }));
+
 
 // Rate limiting
 // const limiter = rateLimit({
