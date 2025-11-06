@@ -10,4 +10,4 @@ Disallow: /admin/
 Disallow: /reseller/
 Disallow: /api/
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://www.primesms.com.ng/sitemap.xml
