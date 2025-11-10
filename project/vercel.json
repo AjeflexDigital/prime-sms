@@ -16,6 +16,10 @@
       "destination": "/server/index.js"
     },
     {
+      "source": "/.well-known/:path*",
+      "destination": "/server/index.js"
+    },
+    {
       "source": "/:path*",
       "destination": "/dist/index.html"
     }
@@ -24,12 +28,19 @@
     {
       "source": "/api/:path*",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache" }
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Pragma", "value": "no-cache" },
+        { "key": "Expires", "value": "0" }
       ]
     }
   ],
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "framework": "vite",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "ignore": [
+    "server",
+    "node_modules"
+  ]
 }
