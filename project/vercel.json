@@ -1,18 +1,41 @@
-{
-  "version": 2,
+// {
+//   "version": 2,
 
+//   "functions": {
+//     "server/index.js": {
+//       "runtime": "nodejs18.x",
+//       "maxDuration": 30
+//     }
+//   },
+
+//   "rewrites": [
+//     { "source": "/api/(.*)", "destination": "/server/index.js" },
+//     { "source": "/(.*)", "destination": "/dist/index.html" }
+//   ],
+
+//   "buildCommand": "npm run build",
+//   "outputDirectory": "dist"
+// }
+
+
+
+{
   "functions": {
     "server/index.js": {
       "runtime": "nodejs18.x",
       "maxDuration": 30
     }
   },
-
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/server/index.js" },
-    { "source": "/(.*)", "destination": "/dist/index.html" }
+    {
+      "source": "/api/:path*",
+      "destination": "/server/index.js"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/dist/index.html"
+    }
   ],
-
   "buildCommand": "npm run build",
   "outputDirectory": "dist"
 }
