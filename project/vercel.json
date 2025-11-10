@@ -1,5 +1,18 @@
 {
+  "version": 2,
+
+  "functions": {
+    "server/index.js": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30
+    }
+  },
+
   "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-  ]
+    { "source": "/api/(.*)", "destination": "/server/index.js" },
+    { "source": "/(.*)", "destination": "/dist/index.html" }
+  ],
+
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
 }

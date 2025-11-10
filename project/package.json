@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "type": "module",
  
+  
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/index.js",
     "client": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "migrate": "node server/migrations/migrate.js",
-    "start": "node server/index.js"    
+    "build:client": "vite build",
+    "build:server": "prisma generate",  
+    "build": "npm run build:server && npm run build:client",  
+    "migrate": "prisma migrate deploy",  
+    "start": "node server/index.js"  
   },
+
 
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
