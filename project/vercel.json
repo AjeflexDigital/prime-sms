@@ -2,7 +2,8 @@
   "functions": {
     "server/index.vercel.js": {
       "runtime": "nodejs18.x",
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "headers": [
@@ -15,20 +16,24 @@
         },
         {
           "key": "Access-Control-Allow-Methods",
-          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+          "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, X-Requested-With"
+          "value": "Content-Type, Authorization, X-Requested-With, Accept"
         },
         {
-          "key": "Access-Control-Allow-Credentials",
-          "value": "true"
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
         }
       ]
     }
   ],
   "rewrites": [
+    {
+      "source": "/api/(?!.*\\..*)$",
+      "destination": "/server/index.vercel.js"
+    },
     {
       "source": "/api/:path*",
       "destination": "/server/index.vercel.js"
