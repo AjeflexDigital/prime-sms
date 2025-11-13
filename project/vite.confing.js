@@ -12,4 +12,6 @@ export default defineConfig({
       '/api': 'http://localhost:5000'  // Local dev proxy to backend
     }
   }
+
 });
+
