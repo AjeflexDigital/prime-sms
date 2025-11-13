@@ -1,8 +1,10 @@
 {
+  "installCommand": "npm ci --include=dev",
+  "buildCommand": "npm run build",
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "/server/index.js"
+      "destination": "/server/index.vercel.js"
     },
     {
       "source": "/(.*)",
