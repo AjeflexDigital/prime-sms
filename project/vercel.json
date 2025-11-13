@@ -2,8 +2,7 @@
   "functions": {
     "server/index.vercel.js": {
       "runtime": "nodejs18.x",
-      "maxDuration": 30,
-      "memory": 1024
+      "maxDuration": 30
     }
   },
   "rewrites": [
@@ -20,14 +19,13 @@
     {
       "source": "/api/:path*",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
-        { "key": "Pragma", "value": "no-cache" },
-        { "key": "Expires", "value": "0" }
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
       ]
     }
   ],
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "trailingSlash": false
 }
