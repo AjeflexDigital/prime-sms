@@ -2,10 +2,7 @@
   "name": "bulk-sms-platform",
   "version": "1.0.0",
   "type": "module",
- 
-  
-   
-  
+
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/index.js",
@@ -56,7 +53,6 @@
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",
-    "typescript-eslint": "^8.3.0",
-   
+    "typescript-eslint": "^8.3.0"
   }
 }
