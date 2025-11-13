@@ -1,14 +1,15 @@
 import { defineConfig } from 'vite';
-// Add your plugins (e.g., react)
+import react from '@vitejs/plugin-react';  // Adjust if not React
 
 export default defineConfig({
-  // ... plugins
+  plugins: [react()],
+  build: {
+    outDir: 'dist',
+    sourcemap: true
+  },
   server: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:5000',  // Local backend port
-        changeOrigin: true,
-      },
-    },
-  },
+      '/api': 'http://localhost:5000'  // Local dev proxy to backend
+    }
+  }
 });
