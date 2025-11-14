@@ -2,14 +2,13 @@
   "name": "bulk-sms-platform",
   "version": "1.0.0",
   "type": "module",
-
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/index.js",
     "client": "vite",
     "build:client": "vite build",
-    "build:server": "echo 'Backend ready - no build needed'",
-    "build": "vite build",
+   "build:server": "esbuild server/index.js --bundle --platform=node --outfile=server/index.vercel.js --format=esm --external:pg --external:prisma",
+    "build": "npm run build:server && vite build",
     "preview": "vite preview",
     "migrate": "prisma migrate deploy",
     "start": "node server/index.js"
@@ -17,7 +16,6 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.6.0",
-    "vite": "^5.4.2",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "csv-parser": "^3.0.0",
@@ -36,7 +34,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.9.3",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vite": "^5.4.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
@@ -45,6 +44,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
     "concurrently": "^8.2.2",
+    "esbuild": "^0.27.0",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
     "eslint-plugin-react-refresh": "^0.4.11",
