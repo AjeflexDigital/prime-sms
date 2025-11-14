@@ -1,11 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 
-// Import routes - adjust these paths
+// Route imports
 import authRoutes from '../server/routes/auth.js';
 import userRoutes from '../server/routes/user.js';
 import adminRoutes from '../server/routes/admin.js';
@@ -13,14 +12,11 @@ import smsRoutes from '../server/routes/sms.js';
 import paymentRoutes from '../server/routes/payment.js';
 import resellerRoutes from '../server/routes/reseller.js';
 
-// Import middleware
+// Middleware imports
 import authMiddleware from '../server/middleware/auth.js';
 import errorHandler from '../server/middleware/errorHandler.js';
 
 dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const app = express();
 
@@ -46,7 +42,7 @@ const corsOptions = {
   exposedHeaders: ['Set-Cookie']
 };
 
-// Apply CORS before other middleware
+// Apply CORS first
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
@@ -55,12 +51,32 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+// Rate limiting (reduced for serverless)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.VERCEL_ENV === 'production' 
+});
+app.use(limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10, // Increased from 5 for better UX
+  message: 'Too many auth attempts.'
+});
+
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// ❌ REMOVED: Static files (not supported in serverless)
+// app.use('/uploads', express.static(join(__dirname, 'uploads')));
+
 // Routes
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/user', authMiddleware, userRoutes);
 app.use('/api/admin', authMiddleware, adminRoutes);
 app.use('/api/sms', authMiddleware, smsRoutes);
