@@ -449,3 +449,8 @@ Don’t expose the Client Secret in frontend — only backend should use it.
 osarumwenseosasere90@gmail.com
 joshuasel06@gmail.com pass dy1234
 postgres://b2502888497f7fc3af5ae08abc2a3e2e91e8e21a2ad814e7d1d6645daf6888ce:sk_RpqVYIDmM9RTvIo9351pf@db.prisma.io:5432/postgres?sslmode=require
+
+
+
+
+ 

@@ -511,6 +511,12 @@ router.post(
 
       const { email, password } = req.body;
 
+      console.log("Login attempt", {
+        email,
+        ip: req.ip,
+        ua: req.headers["user-agent"],
+      });
+
       // Get user with profile data
       const userResult = await query(
         `
@@ -522,26 +528,54 @@ router.post(
         [email]
       );
 
+      console.log("DB returned rows for login lookup:", userResult.rows.length);
+
       if (userResult.rows.length === 0) {
+        console.warn("Login failed: user not found for email", email);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
       const user = userResult.rows[0];
 
-      // Check password
-      const isValidPassword = await bcrypt.compare(password, user.password);
+      // Check password (catch bcrypt errors)
+      let isValidPassword = false;
+      try {
+        isValidPassword = await bcrypt.compare(password, user.password);
+      } catch (bcryptErr) {
+        console.error(
+          "bcrypt.compare error during login for",
+          email,
+          bcryptErr
+        );
+        return res
+          .status(500)
+          .json({ message: "Server error during authentication" });
+      }
+
+      console.log("Password comparison result for", email, isValidPassword);
+
       if (!isValidPassword) {
+        console.warn("Login failed: invalid password for", email);
         return res.status(401).json({ message: "Invalid credentials" });
       }
 
-      // Check if account is active
+      // Check if account is banned or suspended (allow pending status)
       if (user.status === "suspended") {
+        console.warn("Login blocked: account suspended for", email);
         return res.status(401).json({ message: "Account is suspended" });
       }
 
       if (user.status === "banned") {
+        console.warn("Login blocked: account banned for", email);
         return res.status(401).json({ message: "Account is banned" });
       }
+
+      console.log(
+        "✅ Login successful for",
+        email,
+        "with status:",
+        user.status
+      );
 
       // Update last login
       await query(
