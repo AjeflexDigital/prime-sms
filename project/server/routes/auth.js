@@ -377,9 +377,9 @@ const router = express.Router();
  * Generate JWT tokens (access + refresh)
  */
 const generateTokens = (userId) => {
-  const jwtSecret = process.env.JWT_SECRET || "your-super-secret-jwt-key-here";
+  const jwtSecret = process.env.JWT_SECRET || "-super-secret-jwt-key-here";
   const refreshSecret =
-    process.env.JWT_REFRESH_SECRET || "your-super-secret-refresh-key-here";
+    process.env.JWT_REFRESH_SECRET || "super-secret-refresh-key-here";
 
   const accessToken = jwt.sign({ userId }, jwtSecret, { expiresIn: "15m" });
 
@@ -487,12 +487,10 @@ router.post(
       });
     } catch (error) {
       console.error("Registration error:", error);
-      res
-        .status(500)
-        .json({
-          message: "Server error during registration",
-          details: error.message,
-        });
+      res.status(500).json({
+        message: "Server error during registration",
+        details: error.message,
+      });
     }
   }
 );
@@ -619,14 +617,17 @@ router.post("/refresh-token", async (req, res) => {
 
     const decoded = jwt.verify(refreshToken, refreshSecret);
 
-    // Check if user still exists
+    // Check if user exists and is NOT banned/suspended
+    // Allow 'pending' status so users can refresh before email verification
     const userResult = await query(
-      "SELECT id FROM users WHERE id = $1 AND status = $2",
-      [decoded.userId, "active"]
+      "SELECT id FROM users WHERE id = $1 AND status NOT IN ('banned', 'suspended')",
+      [decoded.userId]
     );
 
     if (userResult.rows.length === 0) {
-      return res.status(401).json({ message: "User not found or inactive" });
+      return res
+        .status(401)
+        .json({ message: "User not found or account restricted" });
     }
 
     // ✅ Generate new tokens
