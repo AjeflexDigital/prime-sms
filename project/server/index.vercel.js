@@ -60,7 +60,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { fullName, email, phoneNumber, password } = req.body;
-    // Your DB query, bcrypt.hash, jwt.sign logic here (from auth.js)
+    // DB query, bcrypt.hash, jwt.sign logic here (from auth.js)
     // e.g., const hashedPassword = await bcrypt.hash(password, 10);
     // const result = await query('INSERT INTO users ...', [fullName, email, phoneNumber, hashedPassword]);
     res.json({ message: 'User registered successfully' });
