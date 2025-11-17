@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { MessageSquare, Eye, EyeOff, Loader, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,6 +17,15 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [toast, setToast] = useState(null);
+
+  const topRef = useRef(null);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    // auto-dismiss
+    setTimeout(() => setToast(null), 5000);
+  };
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -31,11 +40,17 @@ function RegisterPage() {
 
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      const msg = 'Passwords do not match';
+      setError(msg);
+      showToast('error', msg);
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return false;
     }
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      const msg = 'Password must be at least 6 characters long';
+      setError(msg);
+      showToast('error', msg);
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return false;
     }
     return true;
@@ -57,22 +72,49 @@ function RegisterPage() {
       
       if (result.success) {
         setSuccess(result.message);
+        showToast('success', result.message);
+        // ensure user sees the message
+        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setTimeout(() => {
           navigate('/login');
         }, 3000);
       } else {
         setError(result.message);
+        showToast('error', result.message);
+        topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      const msg = 'An unexpected error occurred. Please try again.';
+      setError(msg);
+      showToast('error', msg);
+      topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div ref={topRef} className="min-h-screen bg-gradient-to-br from-red-50 to-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
+        {/* Toast notification (fixed) */}
+        {toast && (
+          <div
+            role="status"
+            aria-live="polite"
+            className={`fixed top-4 right-4 z-50 max-w-sm w-full rounded shadow-lg p-3 ${toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}
+          >
+            <div className="flex items-start">
+              <div className="flex-1 text-sm font-medium">{toast.message}</div>
+              <button
+                onClick={() => setToast(null)}
+                className="ml-3 text-white opacity-80 hover:opacity-100"
+                aria-label="Dismiss notification"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center justify-center mb-6">
