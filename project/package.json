@@ -7,7 +7,7 @@
     "server": "nodemon server/index.js",
     "client": "vite",
     "build:client": "vite build",
-   "build:server": "esbuild server/index.js --bundle --platform=node --outfile=server/index.vercel.js --format=esm --external:pg --external:prisma",
+  "build:server": "esbuild server/index.js --bundle --platform=node --outfile=server/index.vercel.js --format=esm --external:pg --external:prisma --external:cloudinary",
     "build": "npm run build:server && vite build",
     "preview": "vite preview",
     "migrate": "prisma migrate deploy",
