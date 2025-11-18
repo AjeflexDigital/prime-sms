@@ -3,17 +3,14 @@
   "installCommand": "npm install --include=dev",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "source": "/api/:path*",
+      "destination": "/api"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html",
-      "status": 200
+      "source": "/(.*)",
+      "destination": "/dist/index.html"
     }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false
+  ]
 }
