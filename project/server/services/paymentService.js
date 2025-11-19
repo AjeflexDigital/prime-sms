@@ -1,20 +1,20 @@
-import axios from 'axios';
-import crypto from 'crypto';
-import { query, transaction } from '../config/database.js';
-import { sendPaymentReceiptEmail } from './emailService.js';
+import axios from "axios";
+import crypto from "crypto";
+import { query, transaction } from "../config/database.js";
+import { sendPaymentReceiptEmail } from "./emailService.js";
 
 // Paystack API configuration
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_PUBLIC_KEY = process.env.PAYSTACK_PUBLIC_KEY;
-const PAYSTACK_BASE_URL = 'https://api.paystack.co';
+const PAYSTACK_BASE_URL = "https://api.paystack.co";
 
 // Configure axios for Paystack API
 const paystackAPI = axios.create({
   baseURL: PAYSTACK_BASE_URL,
   headers: {
-    'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-    'Content-Type': 'application/json'
-  }
+    Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+    "Content-Type": "application/json",
+  },
 });
 
 /**
@@ -59,38 +59,59 @@ export const initializePaystackPayment = async (paymentData) => {
   try {
     const { email, amount, reference, userId, callbackUrl } = paymentData;
 
-    const response = await paystackAPI.post('/transaction/initialize', {
+    // Provide a safe fallback for callback URL so we don't send an undefined value to Paystack.
+    const finalCallbackUrl =
+      callbackUrl ||
+      process.env.PAYSTACK_CALLBACK_URL ||
+      `${process.env.CLIENT_URL}/dashboard/wallet?payment=success`;
+
+    const payload = {
       email,
       amount: amount * 100, // Convert to kobo
       reference,
-      currency: 'NGN',
-      callback_url: callbackUrl,
-      subaccount: process.env.PAYSTACK_SUBACCOUNT_CODE, //  Paystack subaccount code
-      bearer: 'subaccount', //  ensures PrimeSMS (subaccount) pays transaction fees
+      currency: "NGN",
+      callback_url: finalCallbackUrl,
+      subaccount: process.env.PAYSTACK_SUBACCOUNT_CODE || undefined, // Paystack subaccount code (optional)
+      bearer: "subaccount", // ensures subaccount bears transaction fees when configured
       metadata: {
         user_id: userId,
         custom_fields: [
           {
             display_name: "User ID",
             variable_name: "user_id",
-            value: userId
-          }
-        ]
-      }
+            value: userId,
+          },
+        ],
+      },
+    };
+
+    // Log payload (without sensitive keys) to help debugging in deployment logs
+    console.debug("Initializing Paystack payment with payload:", {
+      reference: payload.reference,
+      amount: payload.amount,
+      currency: payload.currency,
+      callback_url: payload.callback_url,
+      subaccount: payload.subaccount,
     });
+
+    const response = await paystackAPI.post("/transaction/initialize", payload);
+
+    console.debug(
+      "Paystack initialize response:",
+      response.data?.data || response.data
+    );
 
     return {
       success: true,
-      data: response.data.data
+      data: response.data.data,
     };
-
   } catch (error) {
-    console.error('Paystack initialization error:', error);
-    throw new Error(error.response?.data?.message || 'Payment initialization failed');
+    console.error("Paystack initialization error:", error);
+    throw new Error(
+      error.response?.data?.message || "Payment initialization failed"
+    );
   }
 };
-
-
 
 /**
  * Verify Paystack payment
@@ -101,11 +122,13 @@ export const verifyPaystackPayment = async (reference) => {
     const response = await paystackAPI.get(`/transaction/verify/${reference}`);
     return {
       success: true,
-      data: response.data.data
+      data: response.data.data,
     };
   } catch (error) {
-    console.error('Paystack verification error:', error);
-    throw new Error(error.response?.data?.message || 'Payment verification failed');
+    console.error("Paystack verification error:", error);
+    throw new Error(
+      error.response?.data?.message || "Payment verification failed"
+    );
   }
 };
 
@@ -114,13 +137,13 @@ export const verifyPaystackPayment = async (reference) => {
  */
 export const getPaystackBanks = async () => {
   try {
-    const response = await paystackAPI.get('/bank');
+    const response = await paystackAPI.get("/bank");
     return {
       success: true,
-      banks: response.data.data
+      banks: response.data.data,
     };
   } catch (error) {
-    console.error('Get banks error:', error);
+    console.error("Get banks error:", error);
     return { success: false, banks: [] };
   }
 };
@@ -131,23 +154,25 @@ export const getPaystackBanks = async () => {
  */
 export const createTransferRecipient = async (recipientData) => {
   try {
-    const { name, account_number, bank_code, currency = 'NGN' } = recipientData;
+    const { name, account_number, bank_code, currency = "NGN" } = recipientData;
 
-    const response = await paystackAPI.post('/transferrecipient', {
-      type: 'nuban',
+    const response = await paystackAPI.post("/transferrecipient", {
+      type: "nuban",
       name,
       account_number,
       bank_code,
-      currency
+      currency,
     });
 
     return {
       success: true,
-      recipient: response.data.data
+      recipient: response.data.data,
     };
   } catch (error) {
-    console.error('Create recipient error:', error);
-    throw new Error(error.response?.data?.message || 'Failed to create transfer recipient');
+    console.error("Create recipient error:", error);
+    throw new Error(
+      error.response?.data?.message || "Failed to create transfer recipient"
+    );
   }
 };
 
@@ -157,21 +182,23 @@ export const createTransferRecipient = async (recipientData) => {
  */
 export const processRefund = async (refundData) => {
   try {
-    const { transaction, amount, currency = 'NGN' } = refundData;
+    const { transaction, amount, currency = "NGN" } = refundData;
 
-    const response = await paystackAPI.post('/refund', {
+    const response = await paystackAPI.post("/refund", {
       transaction,
       amount: amount * 100, // Convert to kobo
-      currency
+      currency,
     });
 
     return {
       success: true,
-      refund: response.data.data
+      refund: response.data.data,
     };
   } catch (error) {
-    console.error('Refund error:', error);
-    throw new Error(error.response?.data?.message || 'Refund processing failed');
+    console.error("Refund error:", error);
+    throw new Error(
+      error.response?.data?.message || "Refund processing failed"
+    );
   }
 };
 
@@ -182,10 +209,10 @@ export const processRefund = async (refundData) => {
  */
 export const validateWebhookSignature = (payload, signature) => {
   const hash = crypto
-    .createHmac('sha512', PAYSTACK_SECRET_KEY)
+    .createHmac("sha512", PAYSTACK_SECRET_KEY)
     .update(payload)
-    .digest('hex');
-  
+    .digest("hex");
+
   return hash === signature;
 };
 
@@ -199,17 +226,17 @@ export const processPaymentWebhook = async (eventData) => {
 
     // Find payment record
     const paymentResult = await query(
-      'SELECT * FROM payments WHERE reference = $1',
+      "SELECT * FROM payments WHERE reference = $1",
       [reference]
     );
 
     if (paymentResult.rows.length === 0) {
-      throw new Error('Payment record not found');
+      throw new Error("Payment record not found");
     }
 
     const payment = paymentResult.rows[0];
 
-    if (payment.status === 'pending' && status === 'success') {
+    if (payment.status === "pending" && status === "success") {
       // Process the payment
       await transaction(async (client) => {
         // Update payment status
@@ -221,11 +248,13 @@ export const processPaymentWebhook = async (eventData) => {
         );
 
         // Calculate total credits
-        const totalCredits = parseFloat(payment.credits_awarded) + parseFloat(payment.bonus_credits || 0);
-        
+        const totalCredits =
+          parseFloat(payment.credits_awarded) +
+          parseFloat(payment.bonus_credits || 0);
+
         // Add credits to user account
         await client.query(
-          'UPDATE users SET credits = credits + $1 WHERE id = $2',
+          "UPDATE users SET credits = credits + $1 WHERE id = $2",
           [totalCredits, payment.user_id]
         );
 
@@ -236,10 +265,10 @@ export const processPaymentWebhook = async (eventData) => {
            (SELECT credits FROM users WHERE id = $1), 
            $3, $4, 'paystack', 'completed')`,
           [
-            payment.user_id, 
-            totalCredits, 
+            payment.user_id,
+            totalCredits,
             `Payment received - ₦${payment.amount}`,
-            reference
+            reference,
           ]
         );
 
@@ -260,7 +289,7 @@ export const processPaymentWebhook = async (eventData) => {
             amount: payment.amount,
             credits: payment.credits_awarded,
             bonusCredits: payment.bonus_credits,
-            reference: reference
+            reference: reference,
           });
         }
       });
@@ -269,10 +298,12 @@ export const processPaymentWebhook = async (eventData) => {
       return { success: true };
     }
 
-    return { success: false, message: 'Payment already processed or invalid status' };
-
+    return {
+      success: false,
+      message: "Payment already processed or invalid status",
+    };
   } catch (error) {
-    console.error('Process payment webhook error:', error);
+    console.error("Process payment webhook error:", error);
     throw error;
   }
 };
