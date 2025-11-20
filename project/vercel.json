@@ -5,11 +5,15 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
+      "source": "/api/payment/webhook",
+      "destination": "/api/webhook"
+    },
+    {
       "source": "/api/:path*",
       "destination": "/api"
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]

@@ -1,0 +1,120 @@
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+import { query, transaction } from '../server/config/database.js';
+
+dotenv.config();
+
+export default async function handler(req, res) {
+  // Only allow POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    console.log('Webhook received');
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
+
+    // Get raw body as string for signature verification
+    const payload = JSON.stringify(req.body);
+    
+    // Verify Paystack signature
+    const hash = crypto
+      .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+      .update(payload)
+      .digest('hex');
+
+    const paystackSignature = req.headers['x-paystack-signature'];
+
+    if (hash !== paystackSignature) {
+      console.error('Invalid signature');
+      return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    const event = req.body;
+    console.log('Webhook event:', event.event);
+
+    // Handle successful charge
+    if (event.event === 'charge.success') {
+      const { reference, amount, status, customer, metadata } = event.data;
+
+      console.log('Payment successful:', {
+        reference,
+        amount: amount / 100,
+        email: customer.email,
+        status
+      });
+
+      // Find payment record
+      const paymentResult = await query(
+        'SELECT * FROM payments WHERE reference = $1',
+        [reference]
+      );
+
+      if (paymentResult.rows.length > 0) {
+        const payment = paymentResult.rows[0];
+
+        if (payment.status === 'pending' && status === 'success') {
+          // Process the payment
+          await transaction(async (client) => {
+            // Update payment status
+            await client.query(
+              `UPDATE payments
+               SET status = 'successful', gateway_response = $1, processed_at = CURRENT_TIMESTAMP
+               WHERE reference = $2`,
+              [JSON.stringify(event.data), reference]
+            );
+
+            // Add credits to user account
+            const totalCredits = parseFloat(payment.credits_awarded) + parseFloat(payment.bonus_credits);
+
+            await client.query(
+              'UPDATE users SET credits = credits + $1 WHERE id = $2',
+              [totalCredits, payment.user_id]
+            );
+
+            // Record wallet transaction
+            await client.query(
+              `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, reference, payment_method, status)
+               VALUES ($1, 'credit', $2,
+               (SELECT credits FROM users WHERE id = $1),
+               $3, $4, 'paystack', 'completed')`,
+              [
+                payment.user_id,
+                totalCredits,
+                `Payment received - ₦${payment.amount} + ₦${payment.bonus_credits} bonus`,
+                reference
+              ]
+            );
+
+            // Add bonus transaction if applicable
+            if (payment.bonus_credits > 0) {
+              await client.query(
+                `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, reference, status)
+                 VALUES ($1, 'bonus', $2,
+                 (SELECT credits FROM users WHERE id = $1),
+                 $3, $4, 'completed')`,
+                [
+                  payment.user_id,
+                  payment.bonus_credits,
+                  `Bonus credits - ${((payment.bonus_credits / payment.amount) * 100).toFixed(1)}%`,
+                  `BONUS_${reference}`
+                ]
+              );
+            }
+          });
+
+          console.log('Payment processed successfully');
+        }
+      } else {
+        console.log('Payment record not found for reference:', reference);
+      }
+    }
+
+    return res.status(200).json({ status: 'success', received: true });
+
+  } catch (error) {
+    console.error('Webhook error:', error);
+    return res.status(500).json({ error: 'Webhook processing failed', message: error.message });
+  }
+}
