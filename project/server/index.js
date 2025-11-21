@@ -272,7 +272,6 @@
 // });
 
 // export default app;
-
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -287,7 +286,6 @@ import userRoutes from "./routes/user.js";
 import adminRoutes from "./routes/admin.js";
 import smsRoutes from "./routes/sms.js";
 import paymentRoutes from "./routes/payment.js";
- import { webhookHandler } from "./routes/payment.js";
 import resellerRoutes from "./routes/reseller.js";
 
 // Middleware imports
@@ -302,20 +300,16 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Define allowed origins explicitly (add more as needed, e.g., staging domains)
 const allowedOrigins = [
-  "http://localhost:5173", // Vite dev server
-  "https://www.primesms.com.ng", // Prod frontend
-  "https://primesms.com.ng", // Non-www variant
+  "http://localhost:5173",
+  "https://www.primesms.com.ng",
+  "https://primesms.com.ng",
+  "https://prime-sms-dd88.vercel.app"
 ];
 
-// Custom CORS middleware for precise control
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow non-browser requests (e.g., Postman, mobile apps) without origin
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.warn(`CORS blocked: Origin ${origin} not in allowlist`);
@@ -324,28 +318,23 @@ const corsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Paystack-Signature"],
   exposedHeaders: ["Set-Cookie"],
 };
 
-// Security middleware
-app.use(helmet());
 app.use(cors(corsOptions));
-
-// Explicit OPTIONS handler for preflights (backup)
 app.options("*", cors(corsOptions));
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
-// Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per IP
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use(limiter);
 
-// Stricter for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -353,40 +342,29 @@ const authLimiter = rateLimit({
 });
 app.use("/api/auth", authLimiter);
 
-// Body parsing middleware
+// Body parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Static files
-app.use("/uploads", express.static(join(__dirname, "uploads")));
+// Static files (comment out for Vercel)
+// app.use("/uploads", express.static(join(__dirname, "uploads")));
 
-// Routes
+// Routes - ALL payment routes protected with auth
+// Webhook is handled separately in api/webhook.js
 app.use("/api/auth", authRoutes);
 app.use("/api/user", authMiddleware, userRoutes);
 app.use("/api/admin", authMiddleware, adminRoutes);
 app.use("/api/sms", authMiddleware, smsRoutes);
-// Mount webhook endpoint unprotected so external providers (Paystack) can POST to it.
-// Use express.raw to preserve the raw body for signature verification.
-app.post(
-  "/api/payment/webhook",
-  express.raw({ type: "application/json" }),
-  webhookHandler
-);
-
-// Protect other payment routes with auth
-app.use("/api/payment", authMiddleware, paymentRoutes);
+app.use("/api/payment", authMiddleware, paymentRoutes); // All payment routes need auth
 app.use("/api/reseller", authMiddleware, resellerRoutes);
 
-// Health check endpoint
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
-// Error handling middleware
 app.use(errorHandler);
 
-// Vercel serverless export (no app.listen() in production)
-if (process.env.VERCEL_ENV !== "production" && !process.env.VERCEL) {
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`SMS Platform API is ready`);

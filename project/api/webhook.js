@@ -5,6 +5,16 @@ import { query, transaction } from '../server/config/database.js';
 dotenv.config();
 
 export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Paystack-Signature');
+
+  // Handle OPTIONS preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -15,7 +25,7 @@ export default async function handler(req, res) {
     console.log('Headers:', req.headers);
     console.log('Body:', req.body);
 
-    // Get raw body as string for signature verification
+    // Get payload as string for signature verification
     const payload = JSON.stringify(req.body);
     
     // Verify Paystack signature
@@ -25,6 +35,11 @@ export default async function handler(req, res) {
       .digest('hex');
 
     const paystackSignature = req.headers['x-paystack-signature'];
+
+    if (!paystackSignature) {
+      console.error('No Paystack signature provided');
+      return res.status(401).json({ error: 'No signature provided' });
+    }
 
     if (hash !== paystackSignature) {
       console.error('Invalid signature');
@@ -104,7 +119,9 @@ export default async function handler(req, res) {
             }
           });
 
-          console.log('Payment processed successfully');
+          console.log('Payment processed successfully for reference:', reference);
+        } else {
+          console.log('Payment already processed or not pending:', payment.status);
         }
       } else {
         console.log('Payment record not found for reference:', reference);
