@@ -920,11 +920,4 @@ router.get("/history", async (req, res) => {
 });
 
 
-// keep router.post for mounted route (used when router is mounted directly)
-router.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  webhookHandler
-);
-
 export default router;
