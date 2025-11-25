@@ -20,7 +20,7 @@ import authMiddleware from "./middleware/auth.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 // webhook imports
-import webhookHandler from './api/webhook.js';
+import webhookHandler from '../api/webhook.js';
 
 dotenv.config();
 
