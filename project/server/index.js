@@ -28,6 +28,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+// When running behind a proxy (Vercel, Heroku, etc.) enable trust proxy so
+// Express and middleware (rate-limit, req.ip) use the X-Forwarded-* headers.
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [

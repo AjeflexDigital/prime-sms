@@ -88,7 +88,6 @@ export const sendWelcomeEmail = async ({ email, fullName, verificationToken }) =
           <h2>Hi ${fullName || 'there'}!</h2>
           <p>Thank you for joining our Prime Sms. You're now ready to send professional SMS messages to your customers with ease.</p>
           
-          <p><strong>🎉 You've received 100 FREE trial credits to get started!</strong></p>
           
           <p>To complete your registration, please verify your email address:</p>
           <a href="${process.env.CLIENT_URL}/verify-email/${verificationToken}" class="button">

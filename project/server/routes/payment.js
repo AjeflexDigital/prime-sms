@@ -1,6 +1,303 @@
 
 
 
+// import express from "express";
+// import crypto from "crypto";
+// import axios from "axios";
+// import { body, validationResult } from "express-validator";
+// import { query, transaction } from "../config/database.js";
+// import { calculateBonusCredits } from "../services/pricingService.js";
+// import {
+//   initializePaystackPayment,
+//   verifyPaystackPayment,
+// } from "../services/paymentService.js";
+
+// const router = express.Router();
+
+// // Paystack API configuration
+// const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+// const PAYSTACK_BASE_URL = "https://api.paystack.co";
+
+// // Configure axios for Paystack API
+// const paystackAPI = axios.create({
+//   baseURL: PAYSTACK_BASE_URL,
+//   headers: {
+//     Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+//     "Content-Type": "application/json",
+//   },
+// });
+
+// /**
+//  * POST /api/payment/initialize
+//  * Initialize Paystack payment (REQUIRES AUTH)
+//  */
+// router.post(
+//   "/initialize",
+//   [body("amount").isFloat({ min: 100 }), body("email").isEmail()],
+//   async (req, res) => {
+//     try {
+//       const errors = validationResult(req);
+//       if (!errors.isEmpty()) {
+//         return res.status(400).json({ errors: errors.array() });
+//       }
+
+//       const { amount, email } = req.body;
+//       const userId = req.user.id;
+
+//       // Generate unique reference
+//       const reference = `TXN_${Date.now()}_${crypto
+//         .randomBytes(6)
+//         .toString("hex")}`;
+
+//       // Calculate bonus credits
+//       const bonusInfo = await calculateBonusCredits(amount, amount);
+
+//       // Create payment record
+//       await query(
+//         `INSERT INTO payments (user_id, reference, amount, currency, method, status, credits_awarded, bonus_credits)
+//        VALUES ($1, $2, $3, 'NGN', 'paystack', 'pending', $4, $5)`,
+//         [userId, reference, amount, amount, bonusInfo.bonusAmount]
+//       );
+
+//       // Initialize payment with Paystack - ADD SUBACCOUNT HERE
+//       const paymentResult = await initializePaystackPayment({
+//         email,
+//         amount,
+//         reference: reference,
+//         userId,
+//         callbackUrl: `${process.env.CLIENT_URL}/dashboard/wallet?payment=success`,
+//         // 🔥 ADD SUBACCOUNT CODE
+//         subaccount: process.env.PAYSTACK_SUBACCOUNT_CODE,
+//         bearer: 'subaccount' // or 'account' - who bears the transaction charges
+//       });
+
+//       res.json({
+//         success: true,
+//         data: paymentResult.data,
+//         bonusInfo,
+//       });
+//     } catch (error) {
+//       console.error("Payment initialization error:", error);
+
+//       if (error.response?.data) {
+//         return res.status(400).json({
+//           message:
+//             error.response.data.message || "Payment initialization failed",
+//           error: error.response.data,
+//         });
+//       }
+
+//       res.status(500).json({ message: "Failed to initialize payment" });
+//     }
+//   }
+// );
+
+
+
+// /**
+//  * POST /api/payment/verify
+//  * Verify Paystack payment
+//  */
+// router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
+//   try {
+//     const { reference } = req.body;
+
+//     // Get payment record
+//     const paymentResult = await query(
+//       "SELECT * FROM payments WHERE reference = $1",
+//       [reference]
+//     );
+
+//     if (paymentResult.rows.length === 0) {
+//       return res.status(404).json({ message: "Payment not found" });
+//     }
+
+//     const payment = paymentResult.rows[0];
+
+//     if (payment.status === "successful") {
+//       return res.json({ message: "Payment already verified", payment });
+//     }
+
+//     // Verify payment with Paystack
+//     const verificationResult = await verifyPaystackPayment(reference);
+
+//     if (
+//       verificationResult.success &&
+//       verificationResult.data.status === "success"
+//     ) {
+//       // Process successful payment
+//       await transaction(async (client) => {
+//         // Update payment status
+//         await client.query(
+//           `UPDATE payments 
+//            SET status = 'successful', gateway_response = $1, processed_at = CURRENT_TIMESTAMP
+//            WHERE reference = $2`,
+//           [JSON.stringify(verificationResult.data), reference]
+//         );
+
+//         // Add credits to user account
+//         const totalCredits =
+//           parseFloat(payment.credits_awarded) +
+//           parseFloat(payment.bonus_credits);
+
+//         await client.query(
+//           "UPDATE users SET credits = credits + $1 WHERE id = $2",
+//           [totalCredits, payment.user_id]
+//         );
+
+//         // Record wallet transaction
+//         await client.query(
+//           `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, reference, payment_method, status)
+//            VALUES ($1, 'credit', $2, 
+//            (SELECT credits FROM users WHERE id = $1), 
+//            $3, $4, 'paystack', 'completed')`,
+//           [
+//             payment.user_id,
+//             totalCredits,
+//             `Payment received - ₦${payment.amount} + ₦${payment.bonus_credits} bonus`,
+//             reference,
+//           ]
+//         );
+
+//         // Add bonus transaction if applicable
+//         if (payment.bonus_credits > 0) {
+//           await client.query(
+//             `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, reference, status)
+//              VALUES ($1, 'bonus', $2, 
+//              (SELECT credits FROM users WHERE id = $1), 
+//              $3, $4, 'completed')`,
+//             [
+//               payment.user_id,
+//               payment.bonus_credits,
+//               `Bonus credits - ${(
+//                 (payment.bonus_credits / payment.amount) *
+//                 100
+//               ).toFixed(1)}%`,
+//               `BONUS_${reference}`,
+//             ]
+//           );
+//         }
+//       });
+
+//       // Get user info for email
+//       const userResult = await query(
+//         `SELECT u.email, p.full_name 
+//          FROM users u 
+//          LEFT JOIN profiles p ON u.id = p.user_id 
+//          WHERE u.id = $1`,
+//         [payment.user_id]
+//       );
+
+//       const user = userResult.rows[0];
+
+//       // Send receipt email
+//       try {
+//         await sendPaymentReceiptEmail({
+//           email: user.email,
+//           fullName: user.full_name,
+//           amount: payment.amount,
+//           credits: payment.credits_awarded,
+//           bonusCredits: payment.bonus_credits,
+//           reference: reference,
+//         });
+//       } catch (emailError) {
+//         console.error("Receipt email failed:", emailError);
+//       }
+
+//       res.json({
+//         message: "Payment verified successfully",
+//         payment: {
+//           ...payment,
+//           status: "successful",
+//           totalCredits:
+//             parseFloat(payment.credits_awarded) +
+//             parseFloat(payment.bonus_credits),
+//         },
+//       });
+//     } else {
+//       // Payment failed
+//       await query(
+//         `UPDATE payments 
+//          SET status = 'failed', gateway_response = $1, processed_at = CURRENT_TIMESTAMP
+//          WHERE reference = $2`,
+//         [JSON.stringify(verificationResult.data), reference]
+//       );
+
+//       res.status(400).json({ message: "Payment verification failed" });
+//     }
+//   } catch (error) {
+//     console.error("Payment verification error:", error);
+
+//     // Handle Paystack API errors
+//     if (error.response?.data) {
+//       return res.status(400).json({
+//         message: error.response.data.message || "Payment verification failed",
+//         error: error.response.data,
+//       });
+//     }
+
+//     res.status(500).json({ message: "Failed to verify payment" });
+//   }
+// });
+
+// /**
+//  * GET /api/payment/history
+//  * Get user payment history
+//  */
+// router.get("/history", async (req, res) => {
+//   try {
+//     const { page = 1, limit = 20 } = req.query;
+//     const offset = (page - 1) * limit;
+//     const userId = req.user.id;
+
+//     const result = await query(
+//       `SELECT id, reference, amount, currency, method, status, credits_awarded, 
+//               bonus_credits, created_at, processed_at
+//        FROM payments 
+//        WHERE user_id = $1 
+//        ORDER BY created_at DESC
+//        LIMIT $2 OFFSET $3`,
+//       [userId, limit, offset]
+//     );
+
+//     // Get total count
+//     const countResult = await query(
+//       "SELECT COUNT(*) as total FROM payments WHERE user_id = $1",
+//       [userId]
+//     );
+
+//     res.json({
+//       payments: result.rows,
+//       pagination: {
+//         page: parseInt(page),
+//         limit: parseInt(limit),
+//         total: parseInt(countResult.rows[0].total),
+//         pages: Math.ceil(countResult.rows[0].total / limit),
+//       },
+//     });
+//   } catch (error) {
+//     console.error("Payment history error:", error);
+//     res.status(500).json({ message: "Failed to retrieve payment history" });
+//   }
+// });
+
+
+// export default router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import express from "express";
 import crypto from "crypto";
 import axios from "axios";
@@ -49,6 +346,8 @@ router.post(
         .randomBytes(6)
         .toString("hex")}`;
 
+      console.log(`🔄 Initializing payment for user ${userId}: ${reference}`);
+
       // Calculate bonus credits
       const bonusInfo = await calculateBonusCredits(amount, amount);
 
@@ -59,17 +358,20 @@ router.post(
         [userId, reference, amount, amount, bonusInfo.bonusAmount]
       );
 
-      // Initialize payment with Paystack - ADD SUBACCOUNT HERE
+      console.log(`✅ Payment record created: ${reference}`);
+
+      // Initialize payment with Paystack
       const paymentResult = await initializePaystackPayment({
         email,
         amount,
         reference: reference,
         userId,
-        callbackUrl: `${process.env.CLIENT_URL}/dashboard/wallet?payment=success`,
-        // 🔥 ADD SUBACCOUNT CODE
+        callbackUrl: `${process.env.CLIENT_URL}/dashboard/wallet?payment=success&reference=${reference}`,
         subaccount: process.env.PAYSTACK_SUBACCOUNT_CODE,
-        bearer: 'subaccount' // or 'account' - who bears the transaction charges
+        bearer: 'subaccount'
       });
+
+      console.log(`✅ Paystack payment initialized: ${reference}`);
 
       res.json({
         success: true,
@@ -77,7 +379,7 @@ router.post(
         bonusInfo,
       });
     } catch (error) {
-      console.error("Payment initialization error:", error);
+      console.error("❌ Payment initialization error:", error);
 
       if (error.response?.data) {
         return res.status(400).json({
@@ -92,15 +394,15 @@ router.post(
   }
 );
 
-
-
 /**
  * POST /api/payment/verify
- * Verify Paystack payment
+ * Verify Paystack payment (CRITICAL - THIS CREDITS THE WALLET)
  */
 router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
   try {
     const { reference } = req.body;
+
+    console.log(`🔍 Verifying payment: ${reference}`);
 
     // Get payment record
     const paymentResult = await query(
@@ -109,24 +411,38 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
     );
 
     if (paymentResult.rows.length === 0) {
+      console.error(`❌ Payment not found: ${reference}`);
       return res.status(404).json({ message: "Payment not found" });
     }
 
     const payment = paymentResult.rows[0];
+    console.log(`📊 Payment status: ${payment.status}`);
 
     if (payment.status === "successful") {
+      console.log(`✅ Payment already verified: ${reference}`);
       return res.json({ message: "Payment already verified", payment });
     }
 
     // Verify payment with Paystack
+    console.log(`🔄 Calling Paystack verification API...`);
     const verificationResult = await verifyPaystackPayment(reference);
+
+    console.log(`📥 Paystack response:`, {
+      success: verificationResult.success,
+      status: verificationResult.data?.status,
+      amount: verificationResult.data?.amount
+    });
 
     if (
       verificationResult.success &&
       verificationResult.data.status === "success"
     ) {
+      console.log(`✅ Payment verified successfully, processing...`);
+
       // Process successful payment
       await transaction(async (client) => {
+        console.log(`🔄 Starting database transaction...`);
+
         // Update payment status
         await client.query(
           `UPDATE payments 
@@ -134,23 +450,29 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
            WHERE reference = $2`,
           [JSON.stringify(verificationResult.data), reference]
         );
+        console.log(`✅ Payment status updated`);
 
         // Add credits to user account
         const totalCredits =
           parseFloat(payment.credits_awarded) +
           parseFloat(payment.bonus_credits);
 
-        await client.query(
-          "UPDATE users SET credits = credits + $1 WHERE id = $2",
+        console.log(`💰 Adding ${totalCredits} credits to user ${payment.user_id}`);
+
+        const updateResult = await client.query(
+          "UPDATE users SET credits = credits + $1 WHERE id = $2 RETURNING credits",
           [totalCredits, payment.user_id]
         );
+        
+        console.log(`✅ User credits updated. New balance: ${updateResult.rows[0]?.credits}`);
 
         // Record wallet transaction
-        await client.query(
+        const walletResult = await client.query(
           `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, reference, payment_method, status)
            VALUES ($1, 'credit', $2, 
            (SELECT credits FROM users WHERE id = $1), 
-           $3, $4, 'paystack', 'completed')`,
+           $3, $4, 'paystack', 'completed')
+           RETURNING id, balance`,
           [
             payment.user_id,
             totalCredits,
@@ -158,6 +480,11 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
             reference,
           ]
         );
+
+        console.log(`✅ Wallet transaction recorded:`, {
+          id: walletResult.rows[0]?.id,
+          balance: walletResult.rows[0]?.balance
+        });
 
         // Add bonus transaction if applicable
         if (payment.bonus_credits > 0) {
@@ -176,10 +503,13 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
               `BONUS_${reference}`,
             ]
           );
+          console.log(`✅ Bonus transaction recorded`);
         }
+
+        console.log(`✅ Transaction completed successfully`);
       });
 
-      // Get user info for email
+      // Get user info
       const userResult = await query(
         `SELECT u.email, p.full_name 
          FROM users u 
@@ -190,19 +520,8 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
 
       const user = userResult.rows[0];
 
-      // Send receipt email
-      try {
-        await sendPaymentReceiptEmail({
-          email: user.email,
-          fullName: user.full_name,
-          amount: payment.amount,
-          credits: payment.credits_awarded,
-          bonusCredits: payment.bonus_credits,
-          reference: reference,
-        });
-      } catch (emailError) {
-        console.error("Receipt email failed:", emailError);
-      }
+      // Note: Email sending would go here
+      console.log(`📧 Would send receipt to: ${user?.email}`);
 
       res.json({
         message: "Payment verified successfully",
@@ -216,6 +535,8 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
       });
     } else {
       // Payment failed
+      console.log(`❌ Payment verification failed: ${verificationResult.data?.status}`);
+      
       await query(
         `UPDATE payments 
          SET status = 'failed', gateway_response = $1, processed_at = CURRENT_TIMESTAMP
@@ -223,13 +544,21 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
         [JSON.stringify(verificationResult.data), reference]
       );
 
-      res.status(400).json({ message: "Payment verification failed" });
+      res.status(400).json({ 
+        message: "Payment verification failed",
+        status: verificationResult.data?.status
+      });
     }
   } catch (error) {
-    console.error("Payment verification error:", error);
+    console.error("❌ Payment verification error:", error);
+    console.error("Error details:", {
+      message: error.message,
+      stack: error.stack
+    });
 
     // Handle Paystack API errors
     if (error.response?.data) {
+      console.error("Paystack API error:", error.response.data);
       return res.status(400).json({
         message: error.response.data.message || "Payment verification failed",
         error: error.response.data,
@@ -281,5 +610,43 @@ router.get("/history", async (req, res) => {
   }
 });
 
+/**
+ * GET /api/payment/check/:reference
+ * Check payment status (debugging endpoint)
+ */
+router.get("/check/:reference", async (req, res) => {
+  try {
+    const { reference } = req.params;
+
+    console.log(`🔍 Checking payment status: ${reference}`);
+
+    // Check database
+    const paymentResult = await query(
+      "SELECT * FROM payments WHERE reference = $1",
+      [reference]
+    );
+
+    if (paymentResult.rows.length === 0) {
+      return res.status(404).json({ message: "Payment not found in database" });
+    }
+
+    const payment = paymentResult.rows[0];
+
+    // Check wallet transactions
+    const walletResult = await query(
+      "SELECT * FROM wallets WHERE reference = $1 OR reference = $2",
+      [reference, `BONUS_${reference}`]
+    );
+
+    res.json({
+      payment: payment,
+      wallet_transactions: walletResult.rows,
+      has_wallet_record: walletResult.rows.length > 0
+    });
+  } catch (error) {
+    console.error("Payment check error:", error);
+    res.status(500).json({ message: "Failed to check payment status" });
+  }
+});
 
 export default router;
