@@ -1,6 +1,3 @@
-
-
-
 import express from "express";
 import crypto from "crypto";
 import axios from "axios";
@@ -68,7 +65,7 @@ router.post(
         callbackUrl: `${process.env.CLIENT_URL}/dashboard/wallet?payment=success`,
         // 🔥 ADD SUBACCOUNT CODE
         subaccount: process.env.PAYSTACK_SUBACCOUNT_CODE,
-        bearer: 'subaccount' // or 'account' - who bears the transaction charges
+        bearer: "subaccount", // or 'account' - who bears the transaction charges
       });
 
       res.json({
@@ -91,8 +88,6 @@ router.post(
     }
   }
 );
-
-
 
 /**
  * POST /api/payment/verify
@@ -145,15 +140,21 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
           [totalCredits, payment.user_id]
         );
 
+        // Fetch updated balance
+        const userResult = await client.query(
+          "SELECT credits FROM users WHERE id = $1",
+          [payment.user_id]
+        );
+        const updatedBalance = userResult.rows[0].credits;
+
         // Record wallet transaction
         await client.query(
           `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, reference, payment_method, status)
-           VALUES ($1, 'credit', $2, 
-           (SELECT credits FROM users WHERE id = $1), 
-           $3, $4, 'paystack', 'completed')`,
+           VALUES ($1, 'credit', $2, $3, $4, $5, 'paystack', 'completed')`,
           [
             payment.user_id,
             totalCredits,
+            updatedBalance,
             `Payment received - ₦${payment.amount} + ₦${payment.bonus_credits} bonus`,
             reference,
           ]
@@ -163,12 +164,11 @@ router.post("/verify", [body("reference").notEmpty()], async (req, res) => {
         if (payment.bonus_credits > 0) {
           await client.query(
             `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, reference, status)
-             VALUES ($1, 'bonus', $2, 
-             (SELECT credits FROM users WHERE id = $1), 
-             $3, $4, 'completed')`,
+             VALUES ($1, 'bonus', $2, $3, $4, $5, 'completed')`,
             [
               payment.user_id,
               payment.bonus_credits,
+              updatedBalance,
               `Bonus credits - ${(
                 (payment.bonus_credits / payment.amount) *
                 100
@@ -280,6 +280,5 @@ router.get("/history", async (req, res) => {
     res.status(500).json({ message: "Failed to retrieve payment history" });
   }
 });
-
 
 export default router;
