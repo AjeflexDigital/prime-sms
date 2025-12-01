@@ -57,10 +57,22 @@ app.options("*", (req, res) => {
   res.status(204).send();
 });
 
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // increase global limit to 1000 requests per window
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 app.use(limiter);
 
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5 });
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // allow more auth attempts (adjust as needed)
+  message: "Too many auth attempts. Try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 app.use("/api/auth", authLimiter);
 
 app.use(express.json({ limit: "10mb" }));

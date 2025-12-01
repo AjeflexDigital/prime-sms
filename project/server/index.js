@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -20,7 +19,7 @@ import authMiddleware from "./middleware/auth.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 // webhook imports
-import webhookHandler from '../api/webhook.js';
+import webhookHandler from "../api/webhook.js";
 
 dotenv.config();
 
@@ -30,14 +29,14 @@ const __dirname = dirname(__filename);
 const app = express();
 // When running behind a proxy (Vercel, Heroku, etc.) enable trust proxy so
 // Express and middleware (rate-limit, req.ip) use the X-Forwarded-* headers.
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://www.primesms.com.ng",
   "https://primesms.com.ng",
-  "https://prime-sms-dd88.vercel.app"
+  "https://prime-sms-dd88.vercel.app",
 ];
 
 const corsOptions = {
@@ -51,7 +50,12 @@ const corsOptions = {
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-Paystack-Signature"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "X-Paystack-Signature",
+  ],
   exposedHeaders: ["Set-Cookie"],
 };
 
@@ -61,7 +65,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 1000,
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -70,8 +74,10 @@ app.use(limiter);
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: "Too many auth attempts.",
+  max: 20,
+  message: "Too many auth attempts. Try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use("/api/auth", authLimiter);
 
@@ -85,8 +91,8 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Routes - ALL payment routes protected with auth
 // Webhook is handled separately in api/webhook.js
 app.post(
-  '/api/payment/webhook',
-  express.raw({ type: 'application/json' }),
+  "/api/payment/webhook",
+  express.raw({ type: "application/json" }),
   webhookHandler
 );
 
