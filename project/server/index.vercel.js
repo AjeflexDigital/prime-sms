@@ -1,12 +1,24 @@
-// server/index.vercel.js - Self-contained Express for Vercel (no relative imports)
+// server/index.vercel.js - Express for Vercel with actual routes
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
-import bcrypt from "bcryptjs"; // Inline if used in auth
-import jwt from "jsonwebtoken"; // Inline if used
-import { query } from "../config/database.js"; // Keep if DB is external; adjust path if needed
+
+// Route imports
+import authRoutes from "./routes/auth.js";
+import userRoutes from "./routes/user.js";
+import adminRoutes from "./routes/admin.js";
+import smsRoutes from "./routes/sms.js";
+import paymentRoutes from "./routes/payment.js";
+import resellerRoutes from "./routes/reseller.js";
+
+// Middleware imports
+import authMiddleware from "./middleware/auth.js";
+import errorHandler from "./middleware/errorHandler.js";
+
+// webhook imports
+import webhookHandler from "../api/webhook.js";
 
 dotenv.config();
 
@@ -21,6 +33,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://www.primesms.com.ng",
   "https://primesms.com.ng",
+  "https://prime-sms-dd88.vercel.app",
 ];
 
 const corsOptions = {
@@ -28,38 +41,28 @@ const corsOptions = {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.warn(`CORS blocked: ${origin}`);
-      callback(new Error("Not allowed by CORS"));
+      console.warn(`CORS blocked: Origin ${origin} not in allowlist`);
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
     }
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "X-Paystack-Signature",
+  ],
   exposedHeaders: ["Set-Cookie"],
 };
 
-// Middleware
-app.use(helmet());
 app.use(cors(corsOptions));
-
-app.options("*", (req, res) => {
-  console.log("🟢 OPTIONS preflight:", req.url, "Origin:", req.headers.origin);
-  res.set("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-  );
-  res.set(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With"
-  );
-  res.set("Access-Control-Allow-Credentials", "true");
-  res.status(204).send();
-});
+app.options("*", cors(corsOptions));
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // increase global limit to 1000 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -67,58 +70,39 @@ const limiter = rateLimit({
 app.use(limiter);
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // allow more auth attempts (adjust as needed)
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: "Too many auth attempts. Try again later.",
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use("/api/auth", authLimiter);
 
+// Body parsing
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// Inline Auth Routes Example (copy your auth.js logic here; expand for others)
-app.post("/api/auth/register", async (req, res) => {
-  try {
-    const { fullName, email, phoneNumber, password } = req.body;
-    // DB query, bcrypt.hash, jwt.sign logic here (from auth.js)
-    // e.g., const hashedPassword = await bcrypt.hash(password, 10);
-    // const result = await query('INSERT INTO users ...', [fullName, email, phoneNumber, hashedPassword]);
-    res.json({ message: "User registered successfully" });
-  } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "Server error during registration" });
-  }
-});
+// Routes - Payment webhook handled separately
+app.post(
+  "/api/payment/webhook",
+  express.raw({ type: "application/json" }),
+  webhookHandler
+);
 
-app.post("/api/auth/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    // Your login logic here (query, bcrypt.compare, jwt.sign)
-    res.json({ message: "Login successful", token: "jwt-token" });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(401).json({ message: "Invalid credentials" });
-  }
-});
+app.use("/api/auth", authRoutes);
+app.use("/api/user", authMiddleware, userRoutes);
+app.use("/api/admin", authMiddleware, adminRoutes);
+app.use("/api/sms", authMiddleware, smsRoutes);
+app.use("/api/payment", authMiddleware, paymentRoutes);
+app.use("/api/reseller", authMiddleware, resellerRoutes);
 
-// Inline Other Routes (user, admin, sms, payment, reseller—copy logic from their .js files)
-app.get("/api/user/profile", (req, res) => {
-  // Auth middleware inline or use req.headers.authorization
-  res.json({ message: "User profile" });
-});
-
-// Health
+// Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
 // Error handler
-app.use((err, req, res, next) => {
-  console.error("Error:", err);
-  res.status(500).json({ message: "Internal server error" });
-});
+app.use(errorHandler);
 
 // Vercel handler
 export default function handler(req, res) {
