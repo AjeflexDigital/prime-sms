@@ -436,10 +436,10 @@ router.post(
 
       // Create user and profile in transaction
       const result = await transaction(async (client) => {
-        // Insert user
+        // Insert user and initialize credits with trial credits so new users can send SMS
         const userResult = await client.query(
-          `INSERT INTO users (email, password, verification_token, trial_credits)
-         VALUES ($1, $2, $3, $4) RETURNING id`,
+          `INSERT INTO users (email, password, verification_token, trial_credits, credits)
+         VALUES ($1, $2, $3, $4, $4) RETURNING id`,
           [email, hashedPassword, verificationToken, 100.0]
         );
 

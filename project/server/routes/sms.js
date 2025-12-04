@@ -530,7 +530,13 @@ router.post(
   [
     body("recipient").isMobilePhone(),
     body("message").trim().isLength({ min: 1, max: 1000 }),
-    body("senderId").optional().trim().isLength({ max: 11 }),
+    // Sanitize senderId: strip non-alphanumeric characters and truncate to 11 chars
+    body("senderId")
+      .optional()
+      .trim()
+      .customSanitizer((value) =>
+        (value || "").replace(/[^a-zA-Z0-9]/g, "").substring(0, 11)
+      ),
   ],
   async (req, res) => {
     try {
