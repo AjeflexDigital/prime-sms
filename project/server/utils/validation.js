@@ -12,36 +12,55 @@ export const validatePhoneNumber = (phone) => {
     return { isValid: false, message: 'Phone number is required' };
   }
 
+  console.log(`📞 Validating phone: "${phone}"`);
+
   // Remove all non-digit characters
   const cleaned = phone.replace(/\D/g, '');
+  console.log(`🧹 Cleaned: "${cleaned}"`);
 
-  // Nigerian phone number patterns
-  const nigerianPatterns = [
-    /^234[789][01]\d{8}$/, // +234 format
-    /^0[789][01]\d{8}$/,   // 0 format
-    /^[789][01]\d{8}$/     // without country code
-  ];
+  // Nigerian phone number patterns - FIXED REGEX
+  const patterns = {
+    // 234 + (7/8/9) + 9 more digits = 13 digits total
+    international: /^234[789]\d{9}$/,
+    // 0 + (7/8/9) + 9 more digits = 11 digits total
+    local: /^0[789]\d{9}$/,
+    // (7/8/9) + 9 more digits = 10 digits total
+    noPrefix: /^[789]\d{9}$/
+  };
 
-  for (const pattern of nigerianPatterns) {
-    if (pattern.test(cleaned)) {
-      let formatted;
-      if (cleaned.startsWith('234')) {
-        formatted = `+${cleaned}`;
-      } else if (cleaned.startsWith('0')) {
-        formatted = `+234${cleaned.substr(1)}`;
-      } else {
-        formatted = `+234${cleaned}`;
-      }
-      return { isValid: true, formatted, country: 'NG' };
-    }
+  let formatted;
+
+  if (patterns.international.test(cleaned)) {
+    // Format: 234XXXXXXXXXX (13 digits)
+    formatted = `+${cleaned}`;
+    console.log(`✅ International format: ${formatted}`);
+  } else if (patterns.local.test(cleaned)) {
+    // Format: 0XXXXXXXXXX (11 digits)
+    formatted = `+234${cleaned.substring(1)}`;
+    console.log(`✅ Local format with 0: ${formatted}`);
+  } else if (patterns.noPrefix.test(cleaned)) {
+    // Format: XXXXXXXXXX (10 digits)
+    formatted = `+234${cleaned}`;
+    console.log(`✅ Local format without 0: ${formatted}`);
+  } else {
+    console.log(`❌ No pattern matched. Length: ${cleaned.length}, First chars: ${cleaned.substring(0, 4)}`);
+    return { 
+      isValid: false, 
+      message: `Invalid phone number format. Expected Nigerian mobile number (e.g., 08012345678). Received: ${phone}` 
+    };
   }
 
-  // International format validation
-  if (/^\+\d{10,15}$/.test(`+${cleaned}`)) {
-    return { isValid: true, formatted: `+${cleaned}`, country: 'INTL' };
+  // Verify formatted number is exactly 14 characters (+234XXXXXXXXXX)
+  if (formatted.length !== 14) {
+    console.log(`❌ Formatted length wrong: ${formatted.length} (expected 14)`);
+    return { 
+      isValid: false, 
+      message: 'Phone number format error after formatting' 
+    };
   }
 
-  return { isValid: false, message: 'Invalid phone number format' };
+  console.log(`✅ Phone validated successfully: ${formatted}`);
+  return { isValid: true, formatted, country: 'NG' };
 };
 
 /**
