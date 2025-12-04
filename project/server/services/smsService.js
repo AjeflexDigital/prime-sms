@@ -288,7 +288,10 @@
  * @returns {string|null} - Formatted phone number or null if invalid
  */
 export const validatePhoneNumber = (phoneNumber) => {
-  if (!phoneNumber) return null;
+  if (!phoneNumber) {
+    console.error("validatePhoneNumber: No phone number provided");
+    return null;
+  }
 
   // Remove all non-digit characters
   const cleaned = phoneNumber.replace(/\D/g, "");
@@ -306,7 +309,7 @@ export const validatePhoneNumber = (phoneNumber) => {
       if (cleaned.startsWith("234")) {
         return `+${cleaned}`;
       } else if (cleaned.startsWith("0")) {
-        return `+234${cleaned.substr(1)}`;
+        return `+234${cleaned.slice(1)}`;
       } else {
         return `+234${cleaned}`;
       }
@@ -314,10 +317,13 @@ export const validatePhoneNumber = (phoneNumber) => {
   }
 
   // Try other African countries (basic validation)
-  if (/^\+\d{10,15}$/.test(`+${cleaned}`)) {
+  if (/^\d{10,15}$/.test(cleaned)) {
     return `+${cleaned}`;
   }
 
+  console.error(
+    `validatePhoneNumber: Failed for input '${phoneNumber}' (cleaned: '${cleaned}')`
+  );
   return null;
 };
 
