@@ -439,11 +439,17 @@ export const sendSMS = async ({ to, message, from = "SMS_PLATFORM" }) => {
     console.log(`   From: ${sanitizedFrom}`);
     console.log(`   Message: ${message.substring(0, 50)}...`);
 
-    // Check if we're in production or sandbox mode
-    const isProduction = process.env.NODE_ENV === "production";
-    const apiUrl = isProduction
-      ? "https://api.africastalking.com/version1/messaging"
-      : `${AT_BASE_URL}/version1/messaging`;
+    // Determine Africa's Talking mode: prefer explicit env var, fall back to base URL
+    const AT_MODE = (
+      process.env.AFRICAS_TALKING_MODE ||
+      (AT_BASE_URL.includes("sandbox") ? "sandbox" : "production")
+    ).toLowerCase();
+    const apiUrl =
+      AT_MODE === "production"
+        ? "https://api.africastalking.com/version1/messaging"
+        : `${AT_BASE_URL}/version1/messaging`;
+
+    console.log(`🔧 Africa's Talking mode: ${AT_MODE}`);
 
     console.log(`   Using API: ${apiUrl}`);
 
@@ -454,7 +460,19 @@ export const sendSMS = async ({ to, message, from = "SMS_PLATFORM" }) => {
       from: sanitizedFrom,
     };
 
-    console.log(`📤 Request data:`, requestData);
+    // Don't log secrets; show non-sensitive API info for debugging
+    console.log(`📤 Request data (no secrets):`, {
+      username: AT_USERNAME,
+      to: to,
+      from: sanitizedFrom,
+      messagePreview:
+        message.substring(0, 40) + (message.length > 40 ? "..." : ""),
+    });
+    console.log(
+      `   API Key present: ${AT_API_KEY ? "yes" : "no"} (length: ${
+        AT_API_KEY ? AT_API_KEY.length : 0
+      })`
+    );
 
     const response = await axios.post(
       apiUrl,
@@ -510,6 +528,14 @@ export const sendSMS = async ({ to, message, from = "SMS_PLATFORM" }) => {
     if (error.response) {
       console.error("SMS API Error Response:", error.response.data);
       console.error("SMS API Error Status:", error.response.status);
+
+      // Provide a clearer message for authentication failures
+      if (error.response.status === 401) {
+        throw new Error(
+          "SMS API Error: Authentication failed (401). Check AFRICAS_TALKING_API_KEY, AFRICAS_TALKING_USERNAME, and AFRICAS_TALKING_MODE (sandbox|production)."
+        );
+      }
+
       throw new Error(
         `SMS API Error: ${
           error.response.data.message || error.response.data || "Unknown error"
