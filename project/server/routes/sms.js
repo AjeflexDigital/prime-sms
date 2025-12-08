@@ -463,10 +463,11 @@ import stream from "stream";
 import { v2 as cloudinary } from "cloudinary";
 import { body, validationResult } from "express-validator";
 import { query, transaction } from "../config/database.js";
-import { sendSMS, validatePhoneNumber } from "../services/smsService.js";
+import { sendSMS } from "../services/smsService.js";
 import { checkSpamWords } from "../services/spamFilter.js";
 import { calculateMessageCost } from "../services/pricingService.js";
 import {
+  validatePhoneNumber,
   validateSenderId,
   validateMessage,
   sanitizeInput,
@@ -521,7 +522,6 @@ function uploadBufferToCloudinary(buffer, filename) {
   });
 }
 
-
 /**
  * POST /api/sms/send-single
  * Send single SMS message - FIXED TRANSACTION ORDER
@@ -531,10 +531,12 @@ router.post(
   [
     body("recipient").isMobilePhone(),
     body("message").trim().isLength({ min: 1, max: 1000 }),
-    body('senderId')
+    body("senderId")
       .optional()
       .trim()
-      .customSanitizer((value) => (value || '').replace(/[^a-zA-Z0-9]/g, '').substring(0, 11))
+      .customSanitizer((value) =>
+        (value || "").replace(/[^a-zA-Z0-9]/g, "").substring(0, 11)
+      ),
   ],
   async (req, res) => {
     try {
@@ -551,7 +553,9 @@ router.post(
       // Validate message content
       const messageValidation = validateMessage(message);
       if (!messageValidation.isValid) {
-        console.log(`❌ Message validation failed: ${messageValidation.message}`);
+        console.log(
+          `❌ Message validation failed: ${messageValidation.message}`
+        );
         return res.status(400).json({ message: messageValidation.message });
       }
 
@@ -579,7 +583,7 @@ router.post(
       // Check for spam words
       const spamCheck = await checkSpamWords(message);
       if (spamCheck.isSpam) {
-        console.log(`❌ Spam detected: ${spamCheck.blockedWords.join(', ')}`);
+        console.log(`❌ Spam detected: ${spamCheck.blockedWords.join(", ")}`);
         return res.status(400).json({
           message: "Message contains restricted content",
           blockedWords: spamCheck.blockedWords,
@@ -611,7 +615,7 @@ router.post(
 
       // CRITICAL FIX: Send SMS FIRST, before deducting credits
       console.log(`🔄 Attempting to send SMS via Africa's Talking...`);
-      
+
       let smsResult;
       try {
         smsResult = await sendSMS({
@@ -619,33 +623,36 @@ router.post(
           message: messageValidation.cleaned,
           from: validatedSenderId,
         });
-        
+
         console.log(`✅ SMS sent successfully:`, {
           messageId: smsResult.messageId,
           status: smsResult.status,
-          network: smsResult.network
+          network: smsResult.network,
         });
       } catch (smsError) {
         console.error(`❌ SMS sending failed:`, smsError);
-        return res.status(500).json({ 
-          message: "Failed to send SMS. Please check your SMS service configuration.",
+        return res.status(500).json({
+          message:
+            "Failed to send SMS. Please check your SMS service configuration.",
           error: smsError.message,
-          details: "SMS gateway error - no charges applied"
+          details: "SMS gateway error - no charges applied",
         });
       }
 
       // ONLY deduct credits and log AFTER successful SMS send
-      console.log(`🔄 SMS sent successfully, now processing database transaction...`);
+      console.log(
+        `🔄 SMS sent successfully, now processing database transaction...`
+      );
 
       const result = await transaction(async (client) => {
         console.log(`💳 Deducting ${cost} credits from user ${userId}...`);
-        
+
         // Deduct credits from user
         const updateResult = await client.query(
           "UPDATE users SET credits = credits - $1 WHERE id = $2 RETURNING credits",
           [cost, userId]
         );
-        
+
         const newBalance = parseFloat(updateResult.rows[0]?.credits || 0);
         console.log(`✅ Credits deducted. New balance: ${newBalance}`);
 
@@ -655,15 +662,12 @@ router.post(
           `INSERT INTO wallets (user_id, transaction_type, amount, balance, description, status)
            VALUES ($1, 'debit', $2, $3, $4, 'completed')
            RETURNING id`,
-          [
-            userId, 
-            cost, 
-            newBalance,
-            `SMS to ${phoneValidation.formatted}`
-          ]
+          [userId, cost, newBalance, `SMS to ${phoneValidation.formatted}`]
         );
-        
-        console.log(`✅ Wallet transaction recorded: ID ${walletResult.rows[0].id}`);
+
+        console.log(
+          `✅ Wallet transaction recorded: ID ${walletResult.rows[0].id}`
+        );
 
         // Log message in database
         console.log(`📝 Recording message in database...`);
@@ -704,13 +708,12 @@ router.post(
         message: "SMS sent successfully",
         data: result,
       });
-      
     } catch (error) {
       console.error("❌ Send SMS error:", error);
       console.error("Error stack:", error.stack);
-      res.status(500).json({ 
+      res.status(500).json({
         message: "Failed to send SMS",
-        error: error.message 
+        error: error.message,
       });
     }
   }
