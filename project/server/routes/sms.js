@@ -475,6 +475,19 @@ import {
 
 const router = express.Router();
 
+// TEMP: Test endpoint to verify environment variables are loaded (REMOVE AFTER TESTING)
+router.get("/test-config", (req, res) => {
+  const key = process.env.AFRICAS_TALKING_API_KEY;
+  res.json({
+    apiKeySet: !!key,
+    apiKeyLength: key ? key.length : 0,
+    apiKeyPreview: key ? key.substring(0, 10) + "..." : null,
+    username: process.env.AFRICAS_TALKING_USERNAME || null,
+    mode: process.env.AFRICAS_TALKING_MODE || null,
+    at_base_url: process.env.AFRICAS_TALKING_URL || null,
+  });
+});
+
 // Configure multer to use memory storage for uploads (no disk writes)
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -1092,7 +1105,7 @@ router.get("/stats", async (req, res) => {
       SELECT network, COUNT(*) as count, SUM(cost) as total_cost
       FROM messages 
       WHERE user_id = $1 AND network IS NOT NULL
-      GROUP BY network
+      GROUP BY network 
       ORDER BY count DESC
     `;
 
