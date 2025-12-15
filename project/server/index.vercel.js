@@ -87918,8 +87918,9 @@ var sendSMS = async ({ to, message, from = "SMS_PLATFORM" }) => {
     console.log(`   To: ${to}`);
     console.log(`   From: ${sanitizedFrom}`);
     console.log(`   Message: ${message.substring(0, 50)}...`);
-    const isProduction = process.env.NODE_ENV === "production";
-    const apiUrl = isProduction ? "https://api.africastalking.com/version1/messaging" : `${AT_BASE_URL}/version1/messaging`;
+    const AT_MODE = (process.env.AFRICAS_TALKING_MODE || (AT_BASE_URL.includes("sandbox") ? "sandbox" : "production")).toLowerCase();
+    const apiUrl = AT_MODE === "production" ? "https://api.africastalking.com/version1/messaging" : `${AT_BASE_URL}/version1/messaging`;
+    console.log(`\u{1F527} Africa's Talking mode: ${AT_MODE}`);
     console.log(`   Using API: ${apiUrl}`);
     const requestData = {
       username: AT_USERNAME,
@@ -87927,7 +87928,15 @@ var sendSMS = async ({ to, message, from = "SMS_PLATFORM" }) => {
       message,
       from: sanitizedFrom
     };
-    console.log(`\u{1F4E4} Request data:`, requestData);
+    console.log(`\u{1F4E4} Request data (no secrets):`, {
+      username: AT_USERNAME,
+      to,
+      from: sanitizedFrom,
+      messagePreview: message.substring(0, 40) + (message.length > 40 ? "..." : "")
+    });
+    console.log(
+      `   API Key present: ${AT_API_KEY ? "yes" : "no"} (length: ${AT_API_KEY ? AT_API_KEY.length : 0})`
+    );
     const response = await axios_default.post(
       apiUrl,
       new URLSearchParams(requestData).toString(),
@@ -87971,6 +87980,11 @@ var sendSMS = async ({ to, message, from = "SMS_PLATFORM" }) => {
     if (error.response) {
       console.error("SMS API Error Response:", error.response.data);
       console.error("SMS API Error Status:", error.response.status);
+      if (error.response.status === 401) {
+        throw new Error(
+          "SMS API Error: Authentication failed (401). Check AFRICAS_TALKING_API_KEY, AFRICAS_TALKING_USERNAME, and AFRICAS_TALKING_MODE (sandbox|production)."
+        );
+      }
       throw new Error(
         `SMS API Error: ${error.response.data.message || error.response.data || "Unknown error"}`
       );
@@ -88301,6 +88315,17 @@ var validateMessage = (message) => {
 
 // server/routes/sms.js
 var router4 = import_express4.default.Router();
+router4.get("/test-config", (req, res) => {
+  const key = process.env.AFRICAS_TALKING_API_KEY;
+  res.json({
+    apiKeySet: !!key,
+    apiKeyLength: key ? key.length : 0,
+    apiKeyPreview: key ? key.substring(0, 10) + "..." : null,
+    username: process.env.AFRICAS_TALKING_USERNAME || null,
+    mode: process.env.AFRICAS_TALKING_MODE || null,
+    at_base_url: process.env.AFRICAS_TALKING_URL || null
+  });
+});
 var upload = (0, import_multer.default)({
   storage: import_multer.default.memoryStorage(),
   limits: {
@@ -88774,7 +88799,7 @@ router4.get("/stats", async (req, res) => {
       SELECT network, COUNT(*) as count, SUM(cost) as total_cost
       FROM messages 
       WHERE user_id = $1 AND network IS NOT NULL
-      GROUP BY network
+      GROUP BY network 
       ORDER BY count DESC
     `;
     const networkResult = await query(networkQuery, [userId]);
