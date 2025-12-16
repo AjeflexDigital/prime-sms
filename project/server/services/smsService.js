@@ -661,7 +661,7 @@ export const sendSMS = async ({ to, message, from = "SMS_PLATFORM" }) => {
       username: AT_USERNAME,
       to: to,
       message: message,
-      from: sanitizedFrom,
+      // from: sanitizedFrom,
     };
 
     console.log("\nRequest Body:");

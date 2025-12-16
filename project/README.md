@@ -452,5 +452,14 @@ postgres://b2502888497f7fc3af5ae08abc2a3e2e91e8e21a2ad814e7d1d6645daf6888ce:sk_R
 
 
 
+& "C:\curl-8.17.0_1-win64-mingw\bin\curl.exe" -X POST "https://api.africastalking.com/version1/messaging" -H "Accept: application/json" -H "Content-Type: application/x-www-form-urlencoded" -H "Apikey: atsk_f83f7e025b6181b4e2e81b5a4b0e842aa916603667d64db755335ea749d2e06ba24703fc" -d "username=primesms&to=+2348167666831&message=test&from=Ajeflex" -v
 
- 
+
+& "C:\curl-8.17.0_1-win64-mingw\bin\curl.exe" -X POST "https://api.africastalking.com/version1/messaging" -H "Accept: application/json" -H "Content-Type: application/x-www-form-urlencoded" -H "Apikey:atsk_f83f7e025b6181b4e2e81b5a4b0e842aa916603667d64db755335ea749d2e06ba24703fc
+" -d "username=primesms&to=+2348167666831&message=test&from=SMSPLATFORM" -v
+
+
+ atsk_019c5c62f85d9fa99e63f1eb1dc49db4b8f133538c785c35644b72d28b0512eead659f8b
+
+
+ & "C:\curl-8.17.0_1-win64-mingw\bin\curl.exe" -X POST "https://api.sandbox.africastalking.com/version1/messaging" -H "Accept: application/json" -H "Content-Type: application/x-www-form-urlencoded" -H "Apikey: atsk_019c5c62f85d9fa99e63f1eb1dc49db4b8f133538c785c35644b72d28b0512eead659f8b" -d "username=primesms&to=+2348167666831&message=test" -v
